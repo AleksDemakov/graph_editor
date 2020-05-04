@@ -14,7 +14,7 @@ public:
     GraphWidget(QWidget *parent = nullptr);
     //void nodesColorChange(QString text);
     void item_is_changed();
-    QVector<Node *> get_graph();
+    QVector<Node *> &get_graph();
     QGraphicsScene *sc;
 signals:
     void graphChanged();

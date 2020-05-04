@@ -20,7 +20,7 @@ SOURCES += \
     main.cpp \
     graphwidget.cpp \
     mainwindow.cpp \
-    node.cpp
+    node.cpp \
 
 HEADERS += \
     edge.h \

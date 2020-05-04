@@ -55,24 +55,11 @@ GraphWidget::GraphWidget(QWidget *parent)
 //    sc->addItem(edge1);
 //    sc->addItem(edge2);
 
-    QPointF pos = {0, 0};
-    double x, y;
-    int from, to;
 
     for (int i = 0; i < cnt_of_nodes; i++) {
         graph[i] = new Node(this);
-
-
-        from = sc->sceneRect().left();
-        to = sc->sceneRect().right();
-        x = QRandomGenerator::global()->bounded(from, to);
-
-        to = sc->sceneRect().bottom();
-        from = sc->sceneRect().top();
-        y = QRandomGenerator::global()->bounded(from, to);
-
-        pos = { x, y };
-        graph[i]->setPos(pos);
+        //pos = { x, y };
+        //graph[i]->setPos(pos);
         sc->addItem(graph[i]);
     }
 
@@ -178,8 +165,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //if click on graph view, creates new node
     if(!item_click  && event->button() == Qt::LeftButton)
     {
-        graph.push_back( new Node(this) );
-        graph.back()->setPos( mapToScene(event->pos()) );
+        new Node(this, mapToScene( event->pos() ) );
         sc->addItem( graph.back() );
         emit this->graphChanged();
     }
@@ -243,13 +229,12 @@ void GraphWidget::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    QVector<Node *> nodes = get_graph();
 
-    for (Node *node : nodes)
+    for (Node *node : get_graph())
         node->calculateForces();
 
     bool itemsMoved = false;
-    for (Node *node : nodes) {
+    for (Node *node : get_graph()) {
         if (node->advancePosition())
             itemsMoved = true;
     }
@@ -269,7 +254,7 @@ void GraphWidget::item_is_changed()
 }
 
 
-QVector<Node *> GraphWidget::get_graph()
+QVector<Node *> & GraphWidget::get_graph()
 {
     return graph;
 }

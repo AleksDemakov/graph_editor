@@ -11,6 +11,8 @@ Edge::Edge(Node * source, Node * destination) {
     this->source = source;
     this->destination = destination;
 
+    setCacheMode(DeviceCoordinateCache);
+
     //Makes edges no-clickable
     setAcceptedMouseButtons(Qt::NoButton);
 
@@ -41,10 +43,10 @@ Edge::Edge(Node * source, QPointF destPoint) {
 Edge::~Edge() {
 
     if (source != NULL) {
-        source->edges.remove( this );
+        source->get_edges().remove( this );
     }
     if (destination != NULL) {
-        destination->edges.remove( this );
+        destination->get_edges().remove( this );
     }
 
 }

@@ -5,11 +5,15 @@
 
 class Edge;
 class GraphWidget;
+class NodeLabel;
 
 class Node : public QGraphicsItem
 {
 public:
     Node(GraphWidget *graphWidget);
+    Node(GraphWidget *graphWidget, QPointF pos, QString name);
+    Node(GraphWidget *graphWidget, QPointF pos);
+    Node(GraphWidget *graphWidget, QString name);
 
     enum { Type = UserType + 1 };
     int type() const override { return Type; }
@@ -22,11 +26,10 @@ public:
     void calculateForces();
     bool advancePosition();
 
-    QSet<Edge *> edges;
-
-    QSet<Edge *> get_edges();
+    QSet<Edge *> & get_edges();
     QString get_name();
     void set_name(QString new_name);
+
 public slots:
     void set_color(QColor new_color);
 
@@ -35,11 +38,12 @@ private:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event)override;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     GraphWidget *graph;
+    QSet<Edge *> edges;
 
     QPointF new_calculated_pos;
     QColor color;
     QString name;
-    QGraphicsSimpleTextItem* label;
+    QGraphicsTextItem* label;
 };
 
 #endif // NODE_H

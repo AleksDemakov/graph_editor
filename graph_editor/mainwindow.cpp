@@ -109,6 +109,8 @@ void MainWindow::saveAs(){
 
     QTextStream out(&file);
     out << ui_textEdit->toPlainText();
+
+
 }
 
 void MainWindow::createActions(){
