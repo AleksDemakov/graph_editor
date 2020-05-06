@@ -2,6 +2,7 @@
 #include "node.h"
 #include "edge.h"
 #include "settings.h"
+
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPoint>
@@ -26,7 +27,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
     sc->addText("(0,0)");
-    QGraphicsSimpleTextItem* text = new QGraphicsSimpleTextItem("text");
 
     drawing_an_edge = false;
     drawing_edge = NULL;
@@ -36,8 +36,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     cnt_of_nodes = QRandomGenerator::global()->bounded(5, 15);
 
     //quint32 v = QRandomGenerator::bounded();
-
-    graph.resize(cnt_of_nodes);
 
 //    Node * node_test_edge1 = new Node(this);
 //    node_test_edge1->setPos(-50, -50);
@@ -57,9 +55,7 @@ GraphWidget::GraphWidget(QWidget *parent)
 
 
     for (int i = 0; i < cnt_of_nodes; i++) {
-        graph[i] = new Node(this);
-        //pos = { x, y };
-        //graph[i]->setPos(pos);
+        new Node(this);
         sc->addItem(graph[i]);
     }
 
@@ -167,7 +163,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     {
         new Node(this, mapToScene( event->pos() ) );
         sc->addItem( graph.back() );
-        emit this->graphChanged();
+        //emit this->graphChanged();
     }
     //if click on graph view, creates new node
 

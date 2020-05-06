@@ -7,6 +7,7 @@ class Edge;
 class GraphWidget;
 class NodeLabel;
 
+
 class Node : public QGraphicsItem
 {
 public:
@@ -37,13 +38,13 @@ private:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event)override;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    QPainterPath shape() const override;
     GraphWidget *graph;
     QSet<Edge *> edges;
 
     QPointF new_calculated_pos;
     QColor color;
     QString name;
-    QGraphicsTextItem* label;
 };
 
 #endif // NODE_H

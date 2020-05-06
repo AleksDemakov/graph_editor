@@ -50,6 +50,8 @@ MainWindow::MainWindow()
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
 
+    qDebug() << gwidget->get_graph().size();
+
     emit gwidget->graphChanged();
 }
 

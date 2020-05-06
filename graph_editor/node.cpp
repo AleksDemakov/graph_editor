@@ -40,13 +40,6 @@ Node::Node(GraphWidget *graphWidget, QString name)
     if (name == "") this->set_name( QString::number( cnt_of_nodes - 1 ) );
     else this->set_name( name );
 
-    label = new QGraphicsTextItem(this->get_name(), this);
-
-    QPointF new_pos = { -label->boundingRect().width() / 2.0, -label->boundingRect().height() / 2.0 };
-    label->setPos(new_pos);
-
-
-    //qDebug() << label->boundingRect().width() ;
 }
 
 Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
@@ -81,25 +74,29 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     //painter->drawEllipse(-7, -7, 20, 20);
     //painter->drawEllipse(-15, -15, 30, 30);
 
-    QRadialGradient gradient(-3, -3, 10);
+    QColor node_background;
+
     if (option->state & QStyle::State_Sunken) {
-        //gradient.setCenter(3, 3);
-        //gradient.setFocalPoint(3, 3);
-        /*gradient.setColorAt(1, QColor(Qt::yellow).lighter(120));
-        gradient.setColorAt(0, QColor(Qt::darkYellow).lighter(120));*/
-        gradient.setColorAt(0, color.lighter(60));
+        node_background = color;
     } else {
         /*gradient.setColorAt(0, Qt::yellow);
         gradient.setColorAt(1, Qt::darkYellow);*/
-        gradient.setColorAt(0, QColor(Qt::white));
+        node_background = QColor( Qt::white );
     }
-    painter->setBrush(gradient);
+
 
     //painter->setPen(QPen(Qt::black, 0));
+    painter->setBrush( node_background );
     painter->setPen(QPen(color, 1));
     //painter->drawEllipse(-10, -10, 20, 20);
     //painter->drawEllipse(-17, -17, 34, 34);
     painter->drawEllipse(-24, -24, 48, 48);
+
+    painter->setFont(font);
+
+    //painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
+
+    painter->drawText( this->boundingRect(), Qt::AlignCenter, this->get_name() );
 
 }
 
@@ -225,4 +222,11 @@ void Node::set_color(QColor new_color)
 {
     color = new_color;
     update();
+}
+
+QPainterPath Node::shape() const
+{
+    QPainterPath path;
+    path.addEllipse(boundingRect());
+    return path;
 }

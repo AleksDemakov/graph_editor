@@ -1,3 +1,4 @@
-#include <QColor>
+//#include "settings.h"
 
-double edge_length = 10;
+//edge_length = 100;
+//cnt_of_nodes = 0;
