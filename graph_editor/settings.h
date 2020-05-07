@@ -5,3 +5,4 @@
 
 static double edge_length = 100;
 static int cnt_of_nodes;
+

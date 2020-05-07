@@ -18,14 +18,17 @@ QWidget *loadUi(const QString url) // Return object QWidget
 }
 MainWindow::MainWindow()
 {
+    //items:generate a widget with a .ui file
+    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
+
     gwidget = new GraphWidget(this);
         gwidget->setFixedSize(500, 500);
 
-    //items:generate a widget with a .ui file
-    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
+
+
 
     //menu
     createActions();
@@ -42,6 +45,8 @@ MainWindow::MainWindow()
     this->setCentralWidget(mainContainer);
     this->setFixedSize(1000, 600);
 
+    QRadioButton *but  = findChild<QRadioButton*>("buttonDirected");
+    gwidget->isDirected = but->isChecked();
     ui_textEdit = findChild<QTextEdit*>("textEdit");
     QComboBox *nodeColor = findChild<QComboBox*>("nodeColor");
     QComboBox *edgeColor = findChild<QComboBox*>("edgeColor");
@@ -49,7 +54,8 @@ MainWindow::MainWindow()
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
-
+    connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
+    connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     emit gwidget->graphChanged();
 }
 

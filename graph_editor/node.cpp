@@ -56,6 +56,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen(QPen(color, 0));
     //painter->drawEllipse(-10, -10, 20, 20);
     //painter->drawEllipse(-17, -17, 34, 34);
+    //!--------
     painter->drawEllipse(-24, -24, 47, 47);
 
 }
@@ -77,6 +78,7 @@ QVariant Node::itemChange(GraphicsItemChange change, const QVariant &value) {
 
         for (Edge * edge : edges) {
             edge->adjust();
+            //qDebug()<<"!";
         }
 
         graph->item_is_changed();

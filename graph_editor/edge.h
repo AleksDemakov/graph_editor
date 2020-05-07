@@ -8,8 +8,8 @@ class Node;
 
 class Edge: public QGraphicsItem {
 public:
-    Edge(Node * source, Node * destination);
-    Edge(Node * source, QPointF destPoint);
+    Edge(Node * source, Node * destination, bool isDir);
+    Edge(Node * source, QPointF destPoint, bool isDir);
     ~Edge();
 
     Node * get_source_node() const;
@@ -21,7 +21,8 @@ public:
 
     enum { Type = UserType + 2 };
     int type() const override { return Type; }
-
+    bool getIsDirected();
+    void setIsDirected(bool dir);
     void disable_following_the_cursor();
 public slots:
     void set_color(QColor new_color);
@@ -37,7 +38,7 @@ private:
     QColor color;
     const qreal penWidth = 1.9;
     const qreal extra = (penWidth) / 2.0;
-
+    bool isDirected;
     bool following_the_cursor;
 };
 

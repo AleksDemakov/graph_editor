@@ -8,7 +8,7 @@
 #include <QRandomGenerator>
 #include <QTextEdit>
 #include <QApplication>
-
+#include <QRadioButton>
 
 
 GraphWidget::GraphWidget(QWidget *parent)
@@ -33,7 +33,7 @@ GraphWidget::GraphWidget(QWidget *parent)
 
 
 
-    cnt_of_nodes = QRandomGenerator::global()->bounded(5, 15);
+    cnt_of_nodes = QRandomGenerator::global()->bounded(2, 10);
 
     //quint32 v = QRandomGenerator::bounded();
 
@@ -85,13 +85,25 @@ GraphWidget::GraphWidget(QWidget *parent)
             make_edge = QRandomGenerator::global()->bounded(6);
 
             if (!make_edge) {
-                new_edge = new Edge( graph[i], graph[j] );
+                new_edge = new Edge( graph[i], graph[j], isDirected );
                 sc->addItem(new_edge);
             }
 
         }
     }
 
+}
+
+void GraphWidget::setDirected(){
+
+    QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
+    bool buttonDirValue = false;
+    if(but->objectName() == "buttonDirected")
+        buttonDirValue = true;
+    isDirected = buttonDirValue;
+    for(Node *node:get_graph())
+        for(Edge *edge:node->get_edges())
+            edge->setIsDirected(buttonDirValue);
 }
 
 void GraphWidget::nodesColorChange(QString text)
@@ -113,7 +125,7 @@ void GraphWidget::graphDraw()
 {
     QTextEdit *gtext = qobject_cast<QTextEdit *>(sender());
     QList<QString> edges = gtext->toPlainText().split('\n');
-    //qDebug()<<this->get_graph();
+    //qDebug()<<edges;
     Node *uNode, *vNode;
     for(QString edge:edges){
         uNode=NULL;
@@ -126,13 +138,17 @@ void GraphWidget::graphDraw()
 
 
         for(Node *i:graph){
-            if(i->get_name() == u[1])
+
+            if(i->get_name() == u[1]){
                 vNode = i;
-            if(i->get_name() == u[0])
+            }
+            if(i->get_name() == u[0]){
                 uNode = i;
+            }
         }
         if(!uNode->is_adjacent_with(vNode)){
-            sc->addItem(new Edge( uNode, vNode));
+
+            sc->addItem(new Edge( uNode, vNode, isDirected));
         }
     }
 
@@ -216,7 +232,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
             }
             else {
 
-                drawing_edge = new Edge( item_click, mapToScene( event->pos() ) );
+                drawing_edge = new Edge( item_click, mapToScene( event->pos() ), isDirected );
                 sc->addItem(drawing_edge);
 
             }
