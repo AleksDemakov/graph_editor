@@ -8,7 +8,8 @@
 #include <QRandomGenerator>
 #include <QTextEdit>
 #include <QApplication>
-
+#include <QRadioButton>
+#include <qalgorithms.h>
 
 
 GraphWidget::GraphWidget(QWidget *parent)
@@ -25,15 +26,15 @@ GraphWidget::GraphWidget(QWidget *parent)
     setTransformationAnchor(AnchorUnderMouse);
     scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
-    sc->addText("(0,0)");
-    QGraphicsSimpleTextItem* text = new QGraphicsSimpleTextItem("text");
+    //sc->addText("(0,0)");
+    //QGraphicsSimpleTextItem* text = new QGraphicsSimpleTextItem("text");
 
     drawing_an_edge = false;
     drawing_edge = NULL;
 
 
 
-    cnt_of_nodes = QRandomGenerator::global()->bounded(5, 15);
+    cnt_of_nodes = QRandomGenerator::global()->bounded(2, 10);
 
     //quint32 v = QRandomGenerator::bounded();
 
@@ -85,13 +86,25 @@ GraphWidget::GraphWidget(QWidget *parent)
             make_edge = QRandomGenerator::global()->bounded(6);
 
             if (!make_edge) {
-                new_edge = new Edge( graph[i], graph[j] );
+                new_edge = new Edge( graph[i], graph[j], isDirected );
                 sc->addItem(new_edge);
             }
 
         }
     }
 
+}
+
+void GraphWidget::setDirected(){
+
+    QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
+    bool buttonDirValue = false;
+    if(but->objectName() == "buttonDirected")
+        buttonDirValue = true;
+    isDirected = buttonDirValue;
+    for(Node *node:get_graph())
+        for(Edge *edge:node->get_edges())
+            edge->setIsDirected(buttonDirValue);
 }
 
 void GraphWidget::nodesColorChange(QString text)
@@ -113,7 +126,22 @@ void GraphWidget::graphDraw()
 {
     QTextEdit *gtext = qobject_cast<QTextEdit *>(sender());
     QList<QString> edges = gtext->toPlainText().split('\n');
-    //qDebug()<<this->get_graph();
+    //qDebug()<<edges;
+
+    QVector<Node*> odd;
+
+    for(Node *i:graph){
+        for(Edge *j:i->get_edges()){
+            if(!edges.contains(j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name())){
+                delete j;
+            }
+        }
+    }
+
+
+
+
+
     Node *uNode, *vNode;
     for(QString edge:edges){
         uNode=NULL;
@@ -126,13 +154,17 @@ void GraphWidget::graphDraw()
 
 
         for(Node *i:graph){
-            if(i->get_name() == u[1])
+
+            if(i->get_name() == u[1]){
                 vNode = i;
-            if(i->get_name() == u[0])
+            }
+            if(i->get_name() == u[0]){
                 uNode = i;
+            }
         }
         if(!uNode->is_adjacent_with(vNode)){
-            sc->addItem(new Edge( uNode, vNode));
+
+            sc->addItem(new Edge( uNode, vNode, isDirected));
         }
     }
 
@@ -151,7 +183,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //return;
 
     if(item_click_edge && QApplication::keyboardModifiers() == Qt::ShiftModifier && event->button() == Qt::LeftButton){
-        sc->removeItem(item_click_edge);
+
         delete item_click_edge;
         emit this->graphChanged();
     }
@@ -162,14 +194,12 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     {
         for(Edge *edge:item_click->get_edges())
         {
-            sc->removeItem(edge);
-            //qDebug()<<edge->scene();
             delete edge;
         }
-        sc->removeItem(item_click);
-        //delete item_click;
-        graph.remove(graph.indexOf(item_click));
-        emit this->graphChanged();
+       //sc->removeItem(item_click);
+       graph.removeOne(item_click);
+       delete item_click;
+       emit this->graphChanged();
     }
     // !!-----------------
     // just mouse below
@@ -178,9 +208,10 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //if click on graph view, creates new node
     if(!item_click  && event->button() == Qt::LeftButton)
     {
-        graph.push_back( new Node(this) );
+        graph.push_back( new Node(this, mex()));
         graph.back()->setPos( mapToScene(event->pos()) );
         sc->addItem( graph.back() );
+
         emit this->graphChanged();
     }
     //if click on graph view, creates new node
@@ -191,10 +222,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
         if (!item_click) {
             if (drawing_edge != NULL) {
-                sc->removeItem(drawing_edge);
-                delete (drawing_edge);
-
-                //qDebug() << drawing_edge << item_click;
+                delete drawing_edge;
                 drawing_edge = NULL;
             }
         }
@@ -208,7 +236,6 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
                     emit this->graphChanged();
                 }
                 else {
-                    sc->removeItem(drawing_edge);
                     delete (drawing_edge);
                 }
 
@@ -216,9 +243,8 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
             }
             else {
 
-                drawing_edge = new Edge( item_click, mapToScene( event->pos() ) );
+                drawing_edge = new Edge( item_click, mapToScene( event->pos() ), isDirected );
                 sc->addItem(drawing_edge);
-
             }
 
         }
@@ -269,10 +295,23 @@ void GraphWidget::item_is_changed()
 }
 
 
-QVector<Node *> GraphWidget::get_graph()
+QVector<Node *> & GraphWidget::get_graph()
 {
     return graph;
 }
-
+QString GraphWidget::mex(){
+    int mex = 0;
+    QVector<QString> t;
+    for(Node *i:graph)
+        t.push_back(i->get_name());
+    std::sort(t.begin(), t.end());
+    for(QString i:t){
+        if(i != QString::number(mex)){
+            return QString::number(mex);
+        }else{
+            mex++;}
+    }
+    return QString::number(mex);
+}
 
 

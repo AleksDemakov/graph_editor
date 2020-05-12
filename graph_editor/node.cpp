@@ -10,18 +10,27 @@
 #include <QDebug>
 #include <QtMath>
 
-Node::Node(GraphWidget *graphWidget)
-    : graph(graphWidget)
+Node::Node(GraphWidget *graphWidget, QString name)
+    :graph(graphWidget)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1);
     color = QColor(Qt::black);
-    this->set_name(QString::number(cnt_of_nodes++));
+    this->set_name(name);
     label = new QGraphicsSimpleTextItem(this->get_name(), this);
 }
+Node::Node(GraphWidget *graphWidget)
+    :Node(graphWidget, QString::number(cnt_of_nodes++))
+{}
 
+Node::~Node() {
+    //cnt_of_nodes--; to do
+    graph->get_graph().removeOne(this);
+    if(scene() != NULL)
+        scene()->removeItem(this);
+}
 
 QRectF Node::boundingRect() const
 {
@@ -56,6 +65,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen(QPen(color, 0));
     //painter->drawEllipse(-10, -10, 20, 20);
     //painter->drawEllipse(-17, -17, 34, 34);
+    //!--------
     painter->drawEllipse(-24, -24, 47, 47);
 
 }
@@ -77,6 +87,7 @@ QVariant Node::itemChange(GraphicsItemChange change, const QVariant &value) {
 
         for (Edge * edge : edges) {
             edge->adjust();
+            //qDebug()<<"!";
         }
 
         graph->item_is_changed();

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -125,6 +125,56 @@
       </property>
      </item>
     </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>151</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <widget class="QRadioButton" name="buttonUndirected">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>103</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>undirected</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="buttonDirected">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>103</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>directed</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </widget>
+    <zorder>groupBox</zorder>
+    <zorder>nodeColor</zorder>
+    <zorder>label</zorder>
+    <zorder>label_2</zorder>
+    <zorder>edgeColor</zorder>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
