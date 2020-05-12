@@ -97,11 +97,38 @@ void MainWindow::open()
     //emit gwidget->graphChanged();
 }
 
+void MainWindow::saveAsPNG(){
+    const QString title = tr("Save As PNG(%1)");
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save graph"), "",
+        tr("Image (*.png);;All Files (*)"));
+    QGraphicsScene *scene = gwidget->sc;
+    //qDebug()<<gwidget->size();
+    QImage image(gwidget->size(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    scene->render(&painter);
+    image.save(fileName);
+}
 void MainWindow::saveAs(){
     const QString title = tr("Save As (%1)");
 
 
-    QString fileName = QFileDialog::getSaveFileName(this, title);
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save graph"), "",
+        tr("dot (*.dot);;Image (*.png);;All Files (*)"));
+    if(fileName.contains("png")){
+        QGraphicsScene *scene = gwidget->sc;
+        //qDebug()<<gwidget->size();
+        QImage image(gwidget->size(), QImage::Format_ARGB32);
+        image.fill(Qt::white);
+
+        QPainter painter(&image);
+        scene->render(&painter);
+        image.save(fileName);
+        return;
+    }
     if (fileName.isEmpty())
         return;
     QFile file(fileName);
@@ -127,6 +154,10 @@ void MainWindow::createActions(){
     saveAsAct->setStatusTip(tr("Save As"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAs);
 
+    saveAsPNGAct = new QAction(tr("&Save As PNG"), this);
+    saveAsPNGAct->setStatusTip(tr("Save As PNG"));
+    connect(saveAsPNGAct, &QAction::triggered, this, &MainWindow::saveAsPNG);
+
     openAct = new QAction(tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip("Open");
@@ -143,6 +174,7 @@ void MainWindow::createMenus()
 
     //fileMenu->addAction(saveAct);
     fileMenu->addAction(saveAsAct);
+    fileMenu->addAction(saveAsPNGAct);
     //fileMenu->addAction(printAct);
 
     fileMenu->addSeparator();

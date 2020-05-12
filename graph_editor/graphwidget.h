@@ -13,7 +13,7 @@ public:
     GraphWidget(QWidget *parent = nullptr);
     //void nodesColorChange(QString text);
     void item_is_changed();
-    QVector<Node *> get_graph();
+    QVector<Node *> &get_graph();
     QGraphicsScene *sc;
     bool isDirected;
 
@@ -28,7 +28,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
-
+    QString mex();
 private:
     bool drawing_an_edge;
     Edge * drawing_edge;

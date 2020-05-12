@@ -10,18 +10,27 @@
 #include <QDebug>
 #include <QtMath>
 
-Node::Node(GraphWidget *graphWidget)
-    : graph(graphWidget)
+Node::Node(GraphWidget *graphWidget, QString name)
+    :graph(graphWidget)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1);
     color = QColor(Qt::black);
-    this->set_name(QString::number(cnt_of_nodes++));
+    this->set_name(name);
     label = new QGraphicsSimpleTextItem(this->get_name(), this);
 }
+Node::Node(GraphWidget *graphWidget)
+    :Node(graphWidget, QString::number(cnt_of_nodes++))
+{}
 
+Node::~Node() {
+    //cnt_of_nodes--; to do
+    graph->get_graph().removeOne(this);
+    if(scene() != NULL)
+        scene()->removeItem(this);
+}
 
 QRectF Node::boundingRect() const
 {

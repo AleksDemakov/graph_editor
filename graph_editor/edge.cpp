@@ -47,7 +47,8 @@ Edge::~Edge() {
     if (destination != NULL) {
         destination->edges.remove( this );
     }
-
+    if(scene() != NULL)
+        scene()->removeItem(this);
 }
 
 
