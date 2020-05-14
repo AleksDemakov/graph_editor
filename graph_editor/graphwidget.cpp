@@ -30,10 +30,10 @@ GraphWidget::GraphWidget(QWidget *parent)
 
     drawing_an_edge = false;
     drawing_edge = NULL;
+    font = QFont("serif");
 
 
-
-    cnt_of_nodes = QRandomGenerator::global()->bounded(2, 10);
+    int cnt = QRandomGenerator::global()->bounded(2, 10);
 
     //quint32 v = QRandomGenerator::bounded();
 
@@ -54,7 +54,7 @@ GraphWidget::GraphWidget(QWidget *parent)
 //    sc->addItem(edge2);
 
 
-    for (int i = 0; i < cnt_of_nodes; i++) {
+    for (int i = 0; i < cnt; i++) {
         new Node(this);
         sc->addItem(graph[i]);
     }
@@ -62,8 +62,8 @@ GraphWidget::GraphWidget(QWidget *parent)
     bool make_edge;
     Edge * new_edge;
 
-    for (int i = 0; i < cnt_of_nodes; i++) {
-        for (int j = i + 1; j < cnt_of_nodes; j++) {
+    for (int i = 0; i < cnt; i++) {
+        for (int j = i + 1; j < cnt; j++) {
 
             make_edge = QRandomGenerator::global()->bounded(6);
 

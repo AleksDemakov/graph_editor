@@ -232,6 +232,7 @@ QString MainWindow::toDot(QString file) {
     resDot += "}";
     //qDebug()<<resDot;
     return resDot;
+}
 
 void MainWindow::addEdgeToGraphData(Edge * edge)
 {

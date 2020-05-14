@@ -18,6 +18,9 @@ public:
     bool isDirected;
     QColor edgeColor;
     QColor nodeColor;
+    double edge_length = 110;
+    int cnt_of_nodes = 0;
+    QFont font;
 
 signals:
     void graphChanged();

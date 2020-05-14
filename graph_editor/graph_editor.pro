@@ -20,15 +20,13 @@ SOURCES += \
     main.cpp \
     graphwidget.cpp \
     mainwindow.cpp \
-    node.cpp \
-    settings.cpp
+    node.cpp
 
 HEADERS += \
     edge.h \
     graphwidget.h \
     mainwindow.h \
-    node.h \
-    settings.h
+    node.h
 
 FORMS += \
     tabwidget.ui

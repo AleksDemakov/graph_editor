@@ -1,9 +1,6 @@
 #include "node.h"
 #include "graphwidget.h"
 #include "edge.h"
-#include "settings.h"
-#include "nodelabel.h"
-
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -23,7 +20,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
     color = graphWidget->nodeColor;
 
     graph->get_graph().push_back( this );
-    cnt_of_nodes++;
+    graph->cnt_of_nodes++;
 
     int from, to;
     double x, y;
@@ -38,7 +35,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
 
     this->setPos(x, y);
 
-    if (name == "") this->set_name( QString::number( cnt_of_nodes - 1 ) );
+    if (name == "") this->set_name( QString::number( graph->cnt_of_nodes - 1 ) );//
     else this->set_name( name );
 
 }
@@ -50,14 +47,14 @@ Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
 }
 
 Node::Node(GraphWidget *graphWidget, QPointF pos)
-    : Node(graphWidget, QString::number(cnt_of_nodes))
+    : Node(graphWidget, QString::number(graphWidget->cnt_of_nodes))//
 {
     this->setPos( pos );
 
 }
 
 Node::Node(GraphWidget *graphWidget)
-    : Node(graphWidget, QString::number(cnt_of_nodes)) {}
+    : Node(graphWidget, QString::number(graphWidget->cnt_of_nodes)) {}//
 
 
 Node::~Node() {
@@ -102,7 +99,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     painter->drawEllipse(-24, -24, 48, 48);
 
-    painter->setFont(font);
+    painter->setFont(graph->font);
 
     painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
 
@@ -188,7 +185,7 @@ void Node::calculateForces() {
         if (d < 1) dx = dy = 3;
 
 
-        if (d < edge_length) {
+        if (d < graph->edge_length) {
             xvel -= 6 / dx;
             yvel -= 6 / dy;
         }
