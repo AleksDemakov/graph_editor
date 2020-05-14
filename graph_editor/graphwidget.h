@@ -21,6 +21,7 @@ public:
 
 signals:
     void graphChanged();
+    void edgedAdded(Edge * edge);
 public slots:
     void graphDraw();
     void nodesColorChange(QString);

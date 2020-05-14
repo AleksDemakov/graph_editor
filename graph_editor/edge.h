@@ -35,6 +35,8 @@ protected:
 
 private:
     GraphWidget *graph;
+    QPainterPath shape() const override;
+
     Node *source, *destination;
     QPointF sourcePoint;
     QPointF destPoint;

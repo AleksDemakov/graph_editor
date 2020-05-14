@@ -2,6 +2,7 @@
 #include "node.h"
 #include "edge.h"
 #include "settings.h"
+
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPoint>
@@ -26,8 +27,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     setTransformationAnchor(AnchorUnderMouse);
     scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
-    //sc->addText("(0,0)");
-    //QGraphicsSimpleTextItem* text = new QGraphicsSimpleTextItem("text");
 
     drawing_an_edge = false;
     drawing_edge = NULL;
@@ -37,8 +36,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     cnt_of_nodes = QRandomGenerator::global()->bounded(2, 10);
 
     //quint32 v = QRandomGenerator::bounded();
-
-    graph.resize(cnt_of_nodes);
 
 //    Node * node_test_edge1 = new Node(this);
 //    node_test_edge1->setPos(-50, -50);
@@ -56,24 +53,9 @@ GraphWidget::GraphWidget(QWidget *parent)
 //    sc->addItem(edge1);
 //    sc->addItem(edge2);
 
-    QPointF pos = {0, 0};
-    double x, y;
-    int from, to;
 
     for (int i = 0; i < cnt_of_nodes; i++) {
-        graph[i] = new Node(this);
-
-
-        from = sc->sceneRect().left();
-        to = sc->sceneRect().right();
-        x = QRandomGenerator::global()->bounded(from, to);
-
-        to = sc->sceneRect().bottom();
-        from = sc->sceneRect().top();
-        y = QRandomGenerator::global()->bounded(from, to);
-
-        pos = { x, y };
-        graph[i]->setPos(pos);
+        new Node(this);
         sc->addItem(graph[i]);
     }
 
@@ -210,11 +192,10 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //if click on graph view, creates new node
     if(!item_click  && event->button() == Qt::LeftButton)
     {
-        graph.push_back( new Node(this, mex()));
-        graph.back()->setPos( mapToScene(event->pos()) );
-        sc->addItem( graph.back() );
 
-        emit this->graphChanged();
+        new Node(this, mapToScene( event->pos() ) );
+        sc->addItem( graph.back() );
+        //emit this->graphChanged();
     }
     //if click on graph view, creates new node
 
@@ -271,13 +252,12 @@ void GraphWidget::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    QVector<Node *> nodes = get_graph();
 
-    for (Node *node : nodes)
+    for (Node *node : get_graph())
         node->calculateForces();
 
     bool itemsMoved = false;
-    for (Node *node : nodes) {
+    for (Node *node : get_graph()) {
         if (node->advancePosition())
             itemsMoved = true;
     }

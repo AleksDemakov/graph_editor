@@ -55,8 +55,13 @@ MainWindow::MainWindow()
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
+
+    //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
+
+    //qDebug() << gwidget->get_graph().size();
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
+
     emit gwidget->graphChanged();
 }
 
@@ -160,6 +165,7 @@ void MainWindow::saveAs(){
         out << toDot(fileName);
         return;
     }
+
 }
 
 void MainWindow::createActions(){
@@ -202,6 +208,7 @@ void MainWindow::createMenus()
 
 }
 
+
 QString MainWindow::toDot(QString file) {
     QFileInfo fi(file);
     QString name = fi.baseName();
@@ -225,4 +232,9 @@ QString MainWindow::toDot(QString file) {
     resDot += "}";
     //qDebug()<<resDot;
     return resDot;
+
+void MainWindow::addEdgeToGraphData(Edge * edge)
+{
+
+
 }
