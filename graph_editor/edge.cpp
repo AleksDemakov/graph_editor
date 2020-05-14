@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QPoint>
+#include <QVector2D>
 
 Edge::Edge(Node * source, Node * destination) {
     if (source == NULL || destination == NULL) return;
@@ -117,6 +118,26 @@ void Edge::set_color(QColor new_color)
 {
     color = new_color;
     update();
+}
+
+QPainterPath Edge::shape() const
+{
+    QPainterPath path;
+    QPolygonF polygon;
+
+    QVector2D vec(destPoint - sourcePoint);
+    vec = { -vec.y(), vec.x() };
+    vec.normalize();
+    vec *= 2 * penWidth;
+
+    polygon << sourcePoint + vec.toPointF() << sourcePoint - vec.toPointF();
+    polygon << destPoint - vec.toPointF() << destPoint + vec.toPointF();
+
+    path.addPolygon( polygon );
+    path.closeSubpath();
+
+    return  path;
+
 }
 
 

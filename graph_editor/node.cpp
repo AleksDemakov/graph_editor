@@ -94,7 +94,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     painter->setFont(font);
 
-    //painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
+    painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
 
     painter->drawText( this->boundingRect(), Qt::AlignCenter, this->get_name() );
 

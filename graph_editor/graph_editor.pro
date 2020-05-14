@@ -27,7 +27,7 @@ HEADERS += \
     edge.h \
     graphwidget.h \
     mainwindow.h \
-    node.h \ \
+    node.h \
     settings.h
 
 FORMS += \

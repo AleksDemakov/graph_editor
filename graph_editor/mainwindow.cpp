@@ -49,6 +49,7 @@ MainWindow::MainWindow()
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
+    connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
 
     qDebug() << gwidget->get_graph().size();
 
@@ -159,5 +160,10 @@ void MainWindow::createMenus()
     helpMenu = menuBar()->addMenu(tr("&Help"));
     //helpMenu->addAction(aboutAct);
     //helpMenu->addAction(aboutQtAct);
+
+}
+
+void MainWindow::addEdgeToGraphData(Edge * edge)
+{
 
 }
