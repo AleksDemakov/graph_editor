@@ -18,14 +18,17 @@ QWidget *loadUi(const QString url) // Return object QWidget
 }
 MainWindow::MainWindow()
 {
+    //items:generate a widget with a .ui file
+    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
+
     gwidget = new GraphWidget(this);
         gwidget->setFixedSize(500, 500);
 
-    //items:generate a widget with a .ui file
-    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
+
+
 
     //menu
     createActions();
@@ -42,6 +45,8 @@ MainWindow::MainWindow()
     this->setCentralWidget(mainContainer);
     this->setFixedSize(1000, 600);
 
+    QRadioButton *but  = findChild<QRadioButton*>("buttonDirected");
+    gwidget->isDirected = but->isChecked();
     ui_textEdit = findChild<QTextEdit*>("textEdit");
     QComboBox *nodeColor = findChild<QComboBox*>("nodeColor");
     QComboBox *edgeColor = findChild<QComboBox*>("edgeColor");
@@ -49,9 +54,12 @@ MainWindow::MainWindow()
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
-    connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
 
-    qDebug() << gwidget->get_graph().size();
+    //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
+
+    //qDebug() << gwidget->get_graph().size();
+    connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
+    connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
 
     emit gwidget->graphChanged();
 }
@@ -94,11 +102,38 @@ void MainWindow::open()
     //emit gwidget->graphChanged();
 }
 
+void MainWindow::saveAsPNG(){
+    const QString title = tr("Save As PNG(%1)");
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save graph"), "",
+        tr("Image (*.png);;All Files (*)"));
+    QGraphicsScene *scene = gwidget->sc;
+    //qDebug()<<gwidget->size();
+    QImage image(gwidget->size(), QImage::Format_ARGB32);
+    image.fill(Qt::white);
+
+    QPainter painter(&image);
+    scene->render(&painter);
+    image.save(fileName);
+}
 void MainWindow::saveAs(){
     const QString title = tr("Save As (%1)");
 
 
-    QString fileName = QFileDialog::getSaveFileName(this, title);
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Save graph"), "",
+        tr("dot (*.dot);;Image (*.png);;All Files (*)"));
+    if(fileName.contains("png")){
+        QGraphicsScene *scene = gwidget->sc;
+        //qDebug()<<gwidget->size();
+        QImage image(gwidget->size(), QImage::Format_ARGB32);
+        image.fill(Qt::white);
+
+        QPainter painter(&image);
+        scene->render(&painter);
+        image.save(fileName);
+        return;
+    }
     if (fileName.isEmpty())
         return;
     QFile file(fileName);
@@ -126,6 +161,10 @@ void MainWindow::createActions(){
     saveAsAct->setStatusTip(tr("Save As"));
     connect(saveAsAct, &QAction::triggered, this, &MainWindow::saveAs);
 
+    saveAsPNGAct = new QAction(tr("&Save As PNG"), this);
+    saveAsPNGAct->setStatusTip(tr("Save As PNG"));
+    connect(saveAsPNGAct, &QAction::triggered, this, &MainWindow::saveAsPNG);
+
     openAct = new QAction(tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip("Open");
@@ -142,6 +181,7 @@ void MainWindow::createMenus()
 
     //fileMenu->addAction(saveAct);
     fileMenu->addAction(saveAsAct);
+    fileMenu->addAction(saveAsPNGAct);
     //fileMenu->addAction(printAct);
 
     fileMenu->addSeparator();

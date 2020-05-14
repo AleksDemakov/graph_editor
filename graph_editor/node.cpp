@@ -21,6 +21,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
     setZValue(1);
     color = QColor(Qt::black);
 
+
     graph->get_graph().push_back( this );
     cnt_of_nodes++;
 
@@ -58,6 +59,13 @@ Node::Node(GraphWidget *graphWidget)
     : Node(graphWidget, QString::number(cnt_of_nodes)) {}
 
 
+Node::~Node() {
+    //cnt_of_nodes--; to do
+    graph->get_graph().removeOne(this);
+    if(scene() != NULL)
+        scene()->removeItem(this);
+}
+
 
 QRectF Node::boundingRect() const
 {
@@ -90,6 +98,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen(QPen(color, 1));
     //painter->drawEllipse(-10, -10, 20, 20);
     //painter->drawEllipse(-17, -17, 34, 34);
+
     painter->drawEllipse(-24, -24, 48, 48);
 
     painter->setFont(font);
@@ -97,6 +106,7 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
 
     painter->drawText( this->boundingRect(), Qt::AlignCenter, this->get_name() );
+
 
 }
 
@@ -117,6 +127,7 @@ QVariant Node::itemChange(GraphicsItemChange change, const QVariant &value) {
 
         for (Edge * edge : edges) {
             edge->adjust();
+            //qDebug()<<"!";
         }
 
         graph->item_is_changed();

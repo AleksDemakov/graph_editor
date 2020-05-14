@@ -12,9 +12,12 @@ class Node : public QGraphicsItem
 {
 public:
     Node(GraphWidget *graphWidget);
+
     Node(GraphWidget *graphWidget, QPointF pos, QString name);
     Node(GraphWidget *graphWidget, QPointF pos);
     Node(GraphWidget *graphWidget, QString name);
+    
+    ~Node();
 
     enum { Type = UserType + 1 };
     int type() const override { return Type; }

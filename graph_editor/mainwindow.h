@@ -54,6 +54,7 @@ private:
     void createActions();
     void createMenus();
     void saveAs();
+    void saveAsPNG();
     void open();
 
     QMenu *fileMenu;
@@ -65,6 +66,7 @@ private:
     QAction *openAct;
     QAction *saveAct;
     QAction *saveAsAct;
+    QAction *saveAsPNGAct;
     QAction *printAct;
     QAction *exitAct;
     QAction *undoAct;
