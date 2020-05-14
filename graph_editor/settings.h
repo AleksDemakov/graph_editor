@@ -8,4 +8,3 @@ static int cnt_of_nodes = 0;
 static QFont font("serif");
 
 #endif // SETTINGS_H
-

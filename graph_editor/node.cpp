@@ -19,8 +19,8 @@ Node::Node(GraphWidget *graphWidget, QString name)
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1);
-    color = QColor(Qt::black);
 
+    color = graphWidget->nodeColor;
 
     graph->get_graph().push_back( this );
     cnt_of_nodes++;
@@ -53,6 +53,7 @@ Node::Node(GraphWidget *graphWidget, QPointF pos)
     : Node(graphWidget, QString::number(cnt_of_nodes))
 {
     this->setPos( pos );
+
 }
 
 Node::Node(GraphWidget *graphWidget)

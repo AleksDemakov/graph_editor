@@ -68,7 +68,7 @@ GraphWidget::GraphWidget(QWidget *parent)
             make_edge = QRandomGenerator::global()->bounded(6);
 
             if (!make_edge) {
-                new_edge = new Edge( graph[i], graph[j], isDirected );
+                new_edge = new Edge(this, graph[i], graph[j], isDirected );
                 sc->addItem(new_edge);
             }
 
@@ -91,6 +91,7 @@ void GraphWidget::setDirected(){
 
 void GraphWidget::nodesColorChange(QString text)
 {
+    nodeColor = QColor(text);
     for(Node* i:get_graph()){
         i->set_color(QColor(text));
     }
@@ -98,6 +99,7 @@ void GraphWidget::nodesColorChange(QString text)
 
 void GraphWidget::edgesColorChange(QString text)
 {
+    edgeColor = QColor(text);
     for(Node* i:get_graph()){
         for(Edge* j:i->get_edges())
             j->set_color(QColor(text));
@@ -145,8 +147,8 @@ void GraphWidget::graphDraw()
             }
         }
         if(!uNode->is_adjacent_with(vNode)){
-
-            sc->addItem(new Edge( uNode, vNode, isDirected));
+            qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
+            sc->addItem(new Edge(this, uNode, vNode, isDirected));
         }
     }
 
@@ -224,7 +226,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
             }
             else {
 
-                drawing_edge = new Edge( item_click, mapToScene( event->pos() ), isDirected );
+                drawing_edge = new Edge(this, item_click, mapToScene( event->pos() ), isDirected );
                 sc->addItem(drawing_edge);
             }
 
