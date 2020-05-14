@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <QDebug>
+#include <QFileinfo>
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
@@ -103,7 +104,6 @@ void MainWindow::saveAsPNG(){
         tr("Save graph"), "",
         tr("Image (*.png);;All Files (*)"));
     QGraphicsScene *scene = gwidget->sc;
-    //qDebug()<<gwidget->size();
     QImage image(gwidget->size(), QImage::Format_ARGB32);
     image.fill(Qt::white);
 
@@ -117,10 +117,10 @@ void MainWindow::saveAs(){
 
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save graph"), "",
-        tr("dot (*.dot);;Image (*.png);;All Files (*)"));
-    if(fileName.contains("png")){
+        tr("text (*.txt);; dot (*.gv);;Image (*.png);;All Files (*)"));
+
+    if(fileName.contains(".png")){
         QGraphicsScene *scene = gwidget->sc;
-        //qDebug()<<gwidget->size();
         QImage image(gwidget->size(), QImage::Format_ARGB32);
         image.fill(Qt::white);
 
@@ -129,19 +129,37 @@ void MainWindow::saveAs(){
         image.save(fileName);
         return;
     }
-    if (fileName.isEmpty())
-        return;
-    QFile file(fileName);
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Warning"),
-                             tr("Cannot write file %1:\n%2")
-                             .arg(QDir::toNativeSeparators(fileName),
-                                  file.errorString()));
+    if(fileName.contains(".txt")){
+        if (fileName.isEmpty())
+            return;
+        QFile file(fileName);
+        if (!file.open(QFile::WriteOnly | QFile::Text)) {
+            QMessageBox::warning(this, tr("Warning"),
+                                 tr("Cannot write file %1:\n%2")
+                                 .arg(QDir::toNativeSeparators(fileName),
+                                      file.errorString()));
+            return;
+        }
+
+        QTextStream out(&file);
+        out << ui_textEdit->toPlainText();
         return;
     }
-
-    QTextStream out(&file);
-    out << ui_textEdit->toPlainText();
+    if(fileName.contains(".gv")){
+        if (fileName.isEmpty())
+            return;
+        QFile file(fileName);
+        if (!file.open(QFile::WriteOnly | QFile::Text)) {
+            QMessageBox::warning(this, tr("Warning"),
+                                 tr("Cannot write file %1:\n%2")
+                                 .arg(QDir::toNativeSeparators(fileName),
+                                      file.errorString()));
+            return;
+        }
+        QTextStream out(&file);
+        out << toDot(fileName);
+        return;
+    }
 }
 
 void MainWindow::createActions(){
@@ -166,32 +184,45 @@ void MainWindow::createActions(){
 
 void MainWindow::createMenus()
 {
-
     fileMenu = menuBar()->addMenu(tr("&File"));
-    //fileMenu->addAction(newAct);
 
     fileMenu->addAction(openAct);
-
-    //fileMenu->addAction(saveAct);
     fileMenu->addAction(saveAsAct);
     fileMenu->addAction(saveAsPNGAct);
-    //fileMenu->addAction(printAct);
 
     fileMenu->addSeparator();
 
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
-    //editMenu->addAction(undoAct);
-    //editMenu->addAction(redoAct);
     editMenu->addSeparator();
-   // editMenu->addAction(cutAct);
-    //editMenu->addAction(copyAct);
-    //editMenu->addAction(pasteAct);
     editMenu->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
-    //helpMenu->addAction(aboutAct);
-    //helpMenu->addAction(aboutQtAct);
 
+}
+
+QString MainWindow::toDot(QString file) {
+    QFileInfo fi(file);
+    QString name = fi.baseName();
+    QString resDot;
+
+
+    resDot = "graph "+ name +"{\n";
+    for(Node *node:gwidget->get_graph()){
+        qDebug()<<node->get_name();
+        resDot += node->get_name() + "\n";
+    }
+    for(Node *node:gwidget->get_graph()){
+
+        for(Edge *edge:node->get_edges()){
+            if(node == edge->get_destination_node())continue;
+            //qDebug()<< node->get_name() +" " +edge->get_destination_node()->get_name();
+            resDot += node->get_name() + " -- ";
+            resDot += edge->get_destination_node()->get_name()+";\n";
+        }
+    }
+    resDot += "}";
+    //qDebug()<<resDot;
+    return resDot;
 }

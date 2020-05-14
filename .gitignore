@@ -16,3 +16,6 @@ graph_editor/moc_mainwindow.o
 graph_editor/moc_predefs.h
 *.o
 *.o
+graph_editor/ui_tabwidget.h
+graph_editor/graph_editor.exe
+graph_editor/.qmake.stash

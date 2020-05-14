@@ -16,6 +16,8 @@ public:
     QVector<Node *> &get_graph();
     QGraphicsScene *sc;
     bool isDirected;
+    QColor edgeColor;
+    QColor nodeColor;
 
 signals:
     void graphChanged();
@@ -30,6 +32,7 @@ protected:
     void timerEvent(QTimerEvent *event) override;
     QString mex();
 private:
+
     bool drawing_an_edge;
     Edge * drawing_edge;
     QVector<Node *> graph;

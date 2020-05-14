@@ -5,11 +5,12 @@
 #include <QPoint>
 
 class Node;
+class GraphWidget;
 
 class Edge: public QGraphicsItem {
 public:
-    Edge(Node * source, Node * destination, bool isDir);
-    Edge(Node * source, QPointF destPoint, bool isDir);
+    Edge(GraphWidget *graphWidget,Node * source, Node * destination, bool isDir);
+    Edge(GraphWidget *graphWidget, Node * source, QPointF destPoint, bool isDir);
     ~Edge();
 
     Node * get_source_node() const;
@@ -31,7 +32,9 @@ protected:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
+
 private:
+    GraphWidget *graph;
     Node *source, *destination;
     QPointF sourcePoint;
     QPointF destPoint;

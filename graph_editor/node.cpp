@@ -17,7 +17,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1);
-    color = QColor(Qt::black);
+    color = graphWidget->nodeColor;
     this->set_name(name);
     label = new QGraphicsSimpleTextItem(this->get_name(), this);
 }

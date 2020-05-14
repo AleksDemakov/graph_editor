@@ -5,12 +5,12 @@
 #include <QDebug>
 #include <QPoint>
 #include <QtMath>
+#include <settings.h>
 
 
-
-Edge::Edge(Node * source, Node * destination, bool isDir) {
+Edge::Edge(GraphWidget *graphWidget,Node * source, Node * destination, bool isDir) {
     if (source == NULL || destination == NULL) return;
-
+    this->graph = graphWidget;
     this->source = source;
     this->destination = destination;
     this->setIsDirected(isDir);
@@ -19,6 +19,7 @@ Edge::Edge(Node * source, Node * destination, bool isDir) {
 
     //addes this edge to nodes' edge lists
     this->setIsDirected(isDir);
+    this->set_color(this->graph->edgeColor);
     source->add_edge(this);
     destination->add_edge(this);
     adjust();
@@ -26,10 +27,11 @@ Edge::Edge(Node * source, Node * destination, bool isDir) {
 
 
 
-Edge::Edge(Node * source, QPointF destPoint, bool isDir){
+Edge::Edge(GraphWidget *graphWidget,Node * source, QPointF destPoint, bool isDir){
     if (source == NULL) return;
-
+    this->graph = graphWidget;
     this->source = source;
+    this->set_color(this->graph->edgeColor);
     this->destination = NULL;
     this->setIsDirected(isDir);
     //Makes edges no-clickable
