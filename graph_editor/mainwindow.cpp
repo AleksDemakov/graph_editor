@@ -54,8 +54,13 @@ MainWindow::MainWindow()
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
     connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
+
+    //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
+
+    //qDebug() << gwidget->get_graph().size();
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
+
     emit gwidget->graphChanged();
 }
 
@@ -142,6 +147,8 @@ void MainWindow::saveAs(){
 
     QTextStream out(&file);
     out << ui_textEdit->toPlainText();
+
+
 }
 
 void MainWindow::createActions(){
@@ -193,5 +200,10 @@ void MainWindow::createMenus()
     helpMenu = menuBar()->addMenu(tr("&Help"));
     //helpMenu->addAction(aboutAct);
     //helpMenu->addAction(aboutQtAct);
+
+}
+
+void MainWindow::addEdgeToGraphData(Edge * edge)
+{
 
 }

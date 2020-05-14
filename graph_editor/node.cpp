@@ -2,6 +2,7 @@
 #include "graphwidget.h"
 #include "edge.h"
 #include "settings.h"
+#include "nodelabel.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -9,21 +10,54 @@
 #include <QStyleOption>
 #include <QDebug>
 #include <QtMath>
+#include <QRandomGenerator>
 
 Node::Node(GraphWidget *graphWidget, QString name)
-    :graph(graphWidget)
+    : graph(graphWidget)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
     setZValue(1);
     color = QColor(Qt::black);
-    this->set_name(name);
-    label = new QGraphicsSimpleTextItem(this->get_name(), this);
+
+
+    graph->get_graph().push_back( this );
+    cnt_of_nodes++;
+
+    int from, to;
+    double x, y;
+
+    from = graph->sceneRect().left();
+    to = graph->sceneRect().right();
+    x = QRandomGenerator::global()->bounded(from, to);
+
+    to = graph->sceneRect().bottom();
+    from = graph->sceneRect().top();
+    y = QRandomGenerator::global()->bounded(from, to);
+
+    this->setPos(x, y);
+
+    if (name == "") this->set_name( QString::number( cnt_of_nodes - 1 ) );
+    else this->set_name( name );
+
 }
+
+Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
+    : Node(graphWidget, name)
+{
+    this->setPos( pos );
+}
+
+Node::Node(GraphWidget *graphWidget, QPointF pos)
+    : Node(graphWidget, QString::number(cnt_of_nodes))
+{
+    this->setPos( pos );
+}
+
 Node::Node(GraphWidget *graphWidget)
-    :Node(graphWidget, QString::number(cnt_of_nodes++))
-{}
+    : Node(graphWidget, QString::number(cnt_of_nodes)) {}
+
 
 Node::~Node() {
     //cnt_of_nodes--; to do
@@ -32,12 +66,13 @@ Node::~Node() {
         scene()->removeItem(this);
 }
 
+
 QRectF Node::boundingRect() const
 {
     qreal adjust = 2;
     //return QRectF( -10 - adjust, -10 - adjust, 23 + adjust, 23 + adjust);
     //17 39.1
-    return QRectF( -26.2 - adjust, -26.2 - adjust, 64 + adjust, 64 + adjust);
+    return QRectF( -24 - adjust, -24 - adjust, 48 + 2 * adjust, 48 + 2 * adjust);
 }
 
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
@@ -45,28 +80,33 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setPen(Qt::NoPen);
     //painter->setBrush(Qt::darkGray);
     //painter->drawEllipse(-7, -7, 20, 20);
-    painter->drawEllipse(-12, -12, 30, 30);
+    //painter->drawEllipse(-15, -15, 30, 30);
 
-    QRadialGradient gradient(-3, -3, 10);
+    QColor node_background;
+
     if (option->state & QStyle::State_Sunken) {
-        gradient.setCenter(3, 3);
-        gradient.setFocalPoint(3, 3);
-        /*gradient.setColorAt(1, QColor(Qt::yellow).lighter(120));
-        gradient.setColorAt(0, QColor(Qt::darkYellow).lighter(120));*/
-        gradient.setColorAt(1, color.lighter(120));
+        node_background = color;
     } else {
         /*gradient.setColorAt(0, Qt::yellow);
         gradient.setColorAt(1, Qt::darkYellow);*/
-        gradient.setColorAt(0, QColor(Qt::white));
+        node_background = QColor( Qt::white );
     }
-    painter->setBrush(gradient);
+
 
     //painter->setPen(QPen(Qt::black, 0));
-    painter->setPen(QPen(color, 0));
+    painter->setBrush( node_background );
+    painter->setPen(QPen(color, 1));
     //painter->drawEllipse(-10, -10, 20, 20);
     //painter->drawEllipse(-17, -17, 34, 34);
-    //!--------
-    painter->drawEllipse(-24, -24, 47, 47);
+
+    painter->drawEllipse(-24, -24, 48, 48);
+
+    painter->setFont(font);
+
+    painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
+
+    painter->drawText( this->boundingRect(), Qt::AlignCenter, this->get_name() );
+
 
 }
 
@@ -177,7 +217,7 @@ void Node::calculateForces() {
     new_calculated_pos.setY( qMax( new_calculated_pos.y(), -300.0 ) );
     new_calculated_pos.setY( qMin( new_calculated_pos.y(), 300.0 ) );
 }
-QSet<Edge *> Node::get_edges()
+QSet<Edge *> & Node::get_edges()
 {
     return edges;
 }
@@ -193,4 +233,11 @@ void Node::set_color(QColor new_color)
 {
     color = new_color;
     update();
+}
+
+QPainterPath Node::shape() const
+{
+    QPainterPath path;
+    path.addEllipse(boundingRect());
+    return path;
 }

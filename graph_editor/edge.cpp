@@ -4,8 +4,8 @@
 #include <QPainter>
 #include <QDebug>
 #include <QPoint>
+#include <QVector2D>
 #include <QtMath>
-
 
 
 Edge::Edge(Node * source, Node * destination, bool isDir) {
@@ -13,7 +13,13 @@ Edge::Edge(Node * source, Node * destination, bool isDir) {
 
     this->source = source;
     this->destination = destination;
+
+
+    setCacheMode(DeviceCoordinateCache);
+
+
     this->setIsDirected(isDir);
+
     //Makes edges no-clickable
     setAcceptedMouseButtons(Qt::NoButton);
 
@@ -42,10 +48,10 @@ Edge::Edge(Node * source, QPointF destPoint, bool isDir){
 Edge::~Edge() {
 
     if (source != NULL) {
-        source->edges.remove( this );
+        source->get_edges().remove( this );
     }
     if (destination != NULL) {
-        destination->edges.remove( this );
+        destination->get_edges().remove( this );
     }
     if(scene() != NULL)
         scene()->removeItem(this);
@@ -151,6 +157,28 @@ void Edge::set_color(QColor new_color)
     color = new_color;
     update();
 }
+
+
+QPainterPath Edge::shape() const
+{
+    QPainterPath path;
+    QPolygonF polygon;
+
+    QVector2D vec(destPoint - sourcePoint);
+    vec = { -vec.y(), vec.x() };
+    vec.normalize();
+    vec *= 2 * penWidth;
+
+    polygon << sourcePoint + vec.toPointF() << sourcePoint - vec.toPointF();
+    polygon << destPoint - vec.toPointF() << destPoint + vec.toPointF();
+
+    path.addPolygon( polygon );
+    path.closeSubpath();
+
+    return  path;
+
+}
+
 bool Edge::getIsDirected(){
     return isDirected;
 }
@@ -158,4 +186,5 @@ void Edge::setIsDirected(bool dir){
     isDirected = dir;
     update();
 }
+
 

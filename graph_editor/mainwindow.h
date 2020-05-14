@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
         MainWindow();
     public slots:
         void graphWrite();
+        void addEdgeToGraphData(Edge * edge);
 
 /*private slots:
     void newFile();

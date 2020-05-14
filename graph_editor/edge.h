@@ -32,6 +32,7 @@ protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
+    QPainterPath shape() const override;
     Node *source, *destination;
     QPointF sourcePoint;
     QPointF destPoint;
