@@ -72,7 +72,7 @@ void MainWindow::graphWrite()
     QString str = "";
 
     for(int i = 0; i < tgraph.size(); i++){
-        for(auto j:tgraph[i]->get_edges()){
+        for(Edge * j:tgraph[i]->get_edges()){
             if(tgraph[i]->get_name() == j->get_destination_node()->get_name())
                 continue;
 

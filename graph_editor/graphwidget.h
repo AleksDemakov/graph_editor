@@ -1,6 +1,7 @@
 #ifndef GRAPHWIDGET_H
 #define GRAPHWIDGET_H
 #include <QGraphicsView>
+#include <QMap>
 
 class Edge;
 class Node;
@@ -21,6 +22,9 @@ public:
     double edge_length = 110;
     int cnt_of_nodes = 0;
     QFont font;
+    int mex();
+
+    void adjust_cnt_of_nodes();
 
 signals:
     void graphChanged();
@@ -30,16 +34,22 @@ public slots:
     void nodesColorChange(QString);
     void edgesColorChange(QString);
     void setDirected();
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
-    QString mex();
+
+    void start_dfs(QString name);
+
+
 private:
 
     bool drawing_an_edge;
     Edge * drawing_edge;
     QVector<Node *> graph;
+    QMap<QString, bool> used;
+    void dfs(Node * node);
 
     int timerId = 0;
 };

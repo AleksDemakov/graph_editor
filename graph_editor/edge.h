@@ -41,10 +41,12 @@ private:
     QPointF sourcePoint;
     QPointF destPoint;
     QColor color;
-    const qreal penWidth = 1.9;
-    const qreal extra = (penWidth) / 2.0;
     bool isDirected;
     bool following_the_cursor;
+
+    qreal penWidth = 1.9;
+    qreal extra = (penWidth + 15 ) / 2.0;
+
 };
 
 #endif // EDGE_H

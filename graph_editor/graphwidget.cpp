@@ -176,12 +176,6 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //deleting node Shift+leftButton
     if(item_click && QApplication::keyboardModifiers() == Qt::ShiftModifier && event->button() == Qt::LeftButton)
     {
-        for(Edge *edge:item_click->get_edges())
-        {
-            delete edge;
-        }
-       //sc->removeItem(item_click);
-       graph.removeOne(item_click);
        delete item_click;
        emit this->graphChanged();
     }
@@ -195,7 +189,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
         new Node(this, mapToScene( event->pos() ) );
         sc->addItem( graph.back() );
-        //emit this->graphChanged();
+        emit this->graphChanged();
     }
     //if click on graph view, creates new node
 
@@ -213,9 +207,10 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
             if (drawing_edge != NULL) {
 
-                if (!item_click->is_adjacent_with( drawing_edge->get_source_node() )) {
+                if (!drawing_edge->get_source_node()->is_adjacent_with( item_click )) {
                     drawing_edge->disable_following_the_cursor();
                     drawing_edge->set_destination_node(item_click);
+                    drawing_edge->setIsDirected(isDirected);
                     emit this->graphChanged();
                 }
                 else {
@@ -226,7 +221,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
             }
             else {
 
-                drawing_edge = new Edge(this, item_click, mapToScene( event->pos() ), isDirected );
+                drawing_edge = new Edge(this, item_click, mapToScene( event->pos() ), 0 );
                 sc->addItem(drawing_edge);
             }
 
@@ -276,24 +271,76 @@ void GraphWidget::item_is_changed()
     }
 }
 
-
 QVector<Node *> & GraphWidget::get_graph()
 {
     return graph;
 }
-QString GraphWidget::mex(){
-    int mex = 0;
-    QVector<QString> t;
-    for(Node *i:graph)
-        t.push_back(i->get_name());
-    std::sort(t.begin(), t.end());
-    for(QString i:t){
-        if(i != QString::number(mex)){
-            return QString::number(mex);
-        }else{
-            mex++;}
+
+int GraphWidget::mex(){
+
+    QVector<bool> was( cnt_of_nodes );
+    bool is_number = new bool(false);
+    int name;
+
+    for (Node * node : get_graph()) {
+        name = node->get_name().toInt(&is_number, 10);
+
+        if (is_number) {
+
+            if (name >= was.size()) {
+                was.resize(name + 1);
+            }
+
+            was[ name ] = true;
+        }
     }
-    return QString::number(mex);
+
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (!was[ i ]) return  i;
+    }
+
+    return  cnt_of_nodes;
+}
+
+void GraphWidget::adjust_cnt_of_nodes() {
+    cnt_of_nodes = get_graph().size();
+
+    qDebug() << cnt_of_nodes;
+}
+
+void GraphWidget::dfs(Node * node) {
+
+    used[ node->get_name() ] = true;
+
+    node->set_color(QColor("orange"));
+
+    for (Edge * edge : node->get_edges()) {
+        if (!used[ edge->get_source_node()->get_name() ]) {
+            dfs( edge->get_source_node() );
+        }
+        if (!used[ edge->get_destination_node()->get_name() ]) {
+            dfs( edge->get_destination_node() );
+        }
+    }
+
+    node->set_color(QColor("red"));
+}
+
+
+void GraphWidget::start_dfs(QString name) {
+    used.clear();
+
+    Node * start;
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (graph[i]->get_name() == name) {
+            start = graph[i];
+        }
+    }
+
+    if (start == NULL) return;
+
+    dfs(start);
+
 }
 
 
