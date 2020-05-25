@@ -47,7 +47,7 @@ private:
 
     QPointF new_calculated_pos;
     QColor color;
-    QString name;
+    QString name = "";
 };
 
 #endif // NODE_H

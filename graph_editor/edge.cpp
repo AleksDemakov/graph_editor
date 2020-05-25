@@ -51,13 +51,17 @@ Edge::Edge(GraphWidget *graphWidget,Node * source, QPointF destPoint, bool isDir
 Edge::~Edge() {
 
     if (source != NULL) {
+        //if (source->get_edges().find( this ) != source->get_edges().end())
         source->get_edges().remove( this );
     }
     if (destination != NULL) {
+        //if (destination->get_edges().find( this ) != destination->get_edges().end())
         destination->get_edges().remove( this );
     }
     if(scene() != NULL)
         scene()->removeItem(this);
+
+    qDebug() << "EDGE DELETED OGO";
 }
 
 
@@ -117,6 +121,13 @@ QRectF Edge::boundingRect() const
 
 void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
+    QPointF adjust_source_and_destination = destPoint - sourcePoint;
+    qreal d = sqrt( adjust_source_and_destination.x() * adjust_source_and_destination.x() + adjust_source_and_destination.y() * adjust_source_and_destination.y() );
+    adjust_source_and_destination.rx() /= d;
+    adjust_source_and_destination.ry() /= d;
+
+    adjust_source_and_destination.rx() *= 6;
+    adjust_source_and_destination.ry() *= 6;
 
     QLineF line(sourcePoint, destPoint);
     if (qFuzzyCompare(line.length(), qreal(0.)))
@@ -132,14 +143,14 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     // Draw the arrows
     double angle = std::atan2(-line.dy(), line.dx());
 
-    QPointF destArrowP1 = destPoint + QPointF(sin(angle - M_PI / 3) * arrowSize,
+    QPointF destArrowP1 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI / 3) * arrowSize,
                                               cos(angle - M_PI / 3) * arrowSize);
-    QPointF destArrowP2 = destPoint + QPointF(sin(angle - M_PI + M_PI / 3) * arrowSize,
+    QPointF destArrowP2 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI + M_PI / 3) * arrowSize,
                                               cos(angle - M_PI + M_PI / 3) * arrowSize);
     //to draw arrow in invert direction swap plus on minus(see Elastic node)
     painter->setBrush(color);
 
-    painter->drawPolygon(QPolygonF() << line.p2() << destArrowP1 << destArrowP2);
+    painter->drawPolygon(QPolygonF() << line.p2() - adjust_source_and_destination << destArrowP1 << destArrowP2);
 
 
 
@@ -186,6 +197,7 @@ bool Edge::getIsDirected(){
 }
 void Edge::setIsDirected(bool dir){
     isDirected = dir;
+    extra = ( penWidth + (dir ? 15 : 0) ) / 2.0;
     update();
 }
 
