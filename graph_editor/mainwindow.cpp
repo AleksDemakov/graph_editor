@@ -1,6 +1,6 @@
 #include <QtWidgets>
 #include <QDebug>
-#include <QFileinfo>
+#include <QFileInfo>
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
@@ -58,7 +58,6 @@ MainWindow::MainWindow()
 
     //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
 
-    //qDebug() << gwidget->get_graph().size();
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
 
@@ -112,10 +111,12 @@ void MainWindow::saveAsPNG(){
     QImage image(gwidget->size(), QImage::Format_ARGB32);
     image.fill(Qt::white);
 
+
     QPainter painter(&image);
     scene->render(&painter);
     image.save(fileName);
 }
+
 void MainWindow::saveAs(){
     const QString title = tr("Save As (%1)");
 

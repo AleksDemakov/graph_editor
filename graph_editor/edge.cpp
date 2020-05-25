@@ -6,7 +6,6 @@
 #include <QPoint>
 #include <QVector2D>
 #include <QtMath>
-#include <settings.h>
 
 
 Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir) {
@@ -101,7 +100,6 @@ void Edge::adjust(QPointF pos) {
 
     sourcePoint = source->pos();
     destPoint = pos;
-
 
 
 }

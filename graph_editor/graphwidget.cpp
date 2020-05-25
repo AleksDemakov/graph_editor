@@ -1,7 +1,6 @@
 #include "graphwidget.h"
 #include "node.h"
 #include "edge.h"
-#include "settings.h"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -127,7 +126,10 @@ void GraphWidget::graphDraw()
 
 
     Node *uNode, *vNode;
+    bool uf, vf;
     for(QString edge:edges){
+        uf=false;
+        vf=false;
         uNode=NULL;
         vNode=NULL;
         if(!edge.contains(' ') || *edge.end() == ' ')continue;
@@ -137,18 +139,29 @@ void GraphWidget::graphDraw()
         //qDebug()<<u;
 
 
-        for(Node *i:graph){
+        for(Node *i:graph) {
 
             if(i->get_name() == u[1]){
                 vNode = i;
+                vf=true;
             }
             if(i->get_name() == u[0]){
                 uNode = i;
+                uf=true;
             }
         }
         if(!uNode->is_adjacent_with(vNode)){
             qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
             sc->addItem(new Edge(this, uNode, vNode, isDirected));
+        }else{
+           /* qDebug()<<uf<<" "<<vf<<" "<<u[0]<<" "<<u[1];
+           if(u[1] == "" || u[0] == "")return;
+
+            if(!uf)
+                new Node(this, u[0]);
+            if(!vf)
+                new Node(this, u[1]);
+                */
         }
     }
 

@@ -49,6 +49,7 @@ Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
 Node::Node(GraphWidget *graphWidget, QPointF pos)
     : Node(graphWidget, QString::number(graphWidget->cnt_of_nodes))//
 {
+    //qDebug()<<pos;
     this->setPos( pos );
 
 }
@@ -205,7 +206,7 @@ void Node::calculateForces() {
 
 
 
-    QRectF sceneRect = scene()->sceneRect();
+    //QRectF sceneRect = scene()->sceneRect();
 
     //qDebug() << sceneRect.left() << sceneRect.right() << this->pos();
 
