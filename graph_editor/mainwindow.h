@@ -19,6 +19,8 @@ class QLabel;
 class QMenu;
 QT_END_NAMESPACE
 
+class GraphWidget;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -29,11 +31,14 @@ class MainWindow : public QMainWindow
 
     public slots:
         void graphWrite();
-        void addEdgeToGraphData(Edge * edge);
+        //void addEdgeToGraphData(Edge * edge);
 
-/*private slots:
-    void save();
-*/
+        void start_dfs();
+        void start_bfs();
+
+    private slots:
+        void start_graph_data_changes_timer();
+
 private:
     void createActions();
     void createMenus();
@@ -55,6 +60,8 @@ private:
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;
     QString fileName;
+
+    QTimer * graph_data_changes_timer;
 };
 
 
