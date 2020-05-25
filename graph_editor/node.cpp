@@ -19,8 +19,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
 
     color = graphWidget->nodeColor;
 
-    graph->get_graph().push_back( this );
-    graph->cnt_of_nodes++;
+
 
     int from, to;
     double x, y;
@@ -35,8 +34,11 @@ Node::Node(GraphWidget *graphWidget, QString name)
 
     this->setPos(x, y);
 
-    if (name == "") this->set_name( QString::number( graph->cnt_of_nodes - 1 ) );//
+    if (name == "") this->set_name( QString::number( graph->mex() ) );//
     else this->set_name( name );
+
+    graph->get_graph().push_back( this );
+    graph->adjust_cnt_of_nodes();
 
 }
 
@@ -47,19 +49,30 @@ Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
 }
 
 Node::Node(GraphWidget *graphWidget, QPointF pos)
-    : Node(graphWidget, QString::number(graphWidget->cnt_of_nodes))//
+    : Node(graphWidget, QString::number(graphWidget->mex()))//
 {
     this->setPos( pos );
 
 }
 
 Node::Node(GraphWidget *graphWidget)
-    : Node(graphWidget, QString::number(graphWidget->cnt_of_nodes)) {}//
+    : Node(graphWidget, QString::number(graphWidget->mex())) {}//
 
 
 Node::~Node() {
-    //cnt_of_nodes--; to do
+
     graph->get_graph().removeOne(this);
+    graph->adjust_cnt_of_nodes();
+
+    QSet<Edge *> copy_edges = get_edges();
+
+    for (Edge * edge : copy_edges) {
+        delete edge;
+    }
+
+    get_edges().clear();
+    copy_edges.clear();
+
     if(scene() != NULL)
         scene()->removeItem(this);
 }
@@ -141,7 +154,7 @@ void Node::add_edge(Edge * edge) {
 
 bool Node::is_adjacent_with(Node * node) {
     for (Edge * edge : edges) {
-        if (edge->get_source_node() == node || edge->get_destination_node() == node) return true;
+        if ( (!graph->isDirected && edge->get_source_node() == node) || edge->get_destination_node() == node) return true;
     }
 
     return  false;

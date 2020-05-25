@@ -1,6 +1,6 @@
 #include <QtWidgets>
 #include <QDebug>
-#include <QFileinfo>
+#include <QFile>
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
@@ -26,10 +26,11 @@ MainWindow::MainWindow()
     //GraphWidget *gwidget = new GraphWidget(this);
 
     gwidget = new GraphWidget(this);
-        gwidget->setFixedSize(500, 500);
+    gwidget->setFixedSize(500, 500);
 
 
-
+    graph_data_changes_timer = new QTimer;
+    connect(graph_data_changes_timer, SIGNAL(timeout()), gwidget, SLOT( graphDraw() ) );
 
     //menu
     createActions();
@@ -51,10 +52,18 @@ MainWindow::MainWindow()
     ui_textEdit = findChild<QTextEdit*>("textEdit");
     QComboBox *nodeColor = findChild<QComboBox*>("nodeColor");
     QComboBox *edgeColor = findChild<QComboBox*>("edgeColor");
+
+    QPushButton *start_dfs_button = findChild<QPushButton *>("dfs_button");
+    QPushButton *start_bfs_button = findChild<QPushButton *>("bfs_button");
+
+    //start_vertex->text()
+
     connect(nodeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(nodesColorChange(QString)));
     connect(edgeColor, SIGNAL(currentTextChanged(QString)), gwidget, SLOT(edgesColorChange(QString)));
-    connect(ui_textEdit, SIGNAL(textChanged()), gwidget, SLOT(graphDraw()));
+    connect(ui_textEdit, SIGNAL(textChanged()), this, SLOT(start_graph_data_changes_timer()));
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
+    connect(start_dfs_button, SIGNAL(clicked()), this, SLOT( start_dfs() ) );
+    connect(start_bfs_button, SIGNAL(clicked()), this, SLOT( start_bfs() ) );
 
     //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
 
@@ -72,7 +81,7 @@ void MainWindow::graphWrite()
     QString str = "";
 
     for(int i = 0; i < tgraph.size(); i++){
-        for(auto j:tgraph[i]->get_edges()){
+        for(Edge * j:tgraph[i]->get_edges()){
             if(tgraph[i]->get_name() == j->get_destination_node()->get_name())
                 continue;
 
@@ -234,8 +243,26 @@ QString MainWindow::toDot(QString file) {
     return resDot;
 }
 
-void MainWindow::addEdgeToGraphData(Edge * edge)
+void MainWindow::start_dfs()
 {
+    QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
+    gwidget->start_dfs( start_vertex->text() );
 
+}
+void MainWindow::start_bfs()
+{
+    QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
+    gwidget->start_bfs( start_vertex->text() );
 
+}
+
+void MainWindow::start_graph_data_changes_timer()
+{
+    if (graph_data_changes_timer->isActive())
+        graph_data_changes_timer->stop();
+
+    graph_data_changes_timer->setInterval(500);
+    graph_data_changes_timer->setSingleShot(true);
+
+    graph_data_changes_timer->start();
 }

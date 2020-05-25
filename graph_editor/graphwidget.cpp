@@ -2,6 +2,7 @@
 #include "node.h"
 #include "edge.h"
 #include "settings.h"
+#include "mainwindow.h"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -31,6 +32,8 @@ GraphWidget::GraphWidget(QWidget *parent)
     drawing_an_edge = false;
     drawing_edge = NULL;
     font = QFont("serif");
+
+    timer = nullptr;
 
 
     int cnt = QRandomGenerator::global()->bounded(2, 10);
@@ -92,8 +95,12 @@ void GraphWidget::setDirected(){
 void GraphWidget::nodesColorChange(QString text)
 {
     nodeColor = QColor(text);
+    nodesColorChange();
+}
+void GraphWidget::nodesColorChange()
+{
     for(Node* i:get_graph()){
-        i->set_color(QColor(text));
+        i->set_color(nodeColor);
     }
 }
 
@@ -108,14 +115,20 @@ void GraphWidget::edgesColorChange(QString text)
 
 void GraphWidget::graphDraw()
 {
-    QTextEdit *gtext = qobject_cast<QTextEdit *>(sender());
+    QTextEdit *gtext = this->parent()->findChild<QTextEdit *>("textEdit");
+
     QList<QString> edges = gtext->toPlainText().split('\n');
-    //qDebug()<<edges;
+
+
+
 
     QVector<Node*> odd;
 
     for(Node *i:graph){
         for(Edge *j:i->get_edges()){
+
+            if (j->get_destination_node() == NULL || j->get_source_node() == NULL) continue;
+
             if(!edges.contains(j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name())){
                 delete j;
             }
@@ -146,11 +159,24 @@ void GraphWidget::graphDraw()
                 uNode = i;
             }
         }
+
+        if (uNode == NULL) {
+            uNode = new Node(this, u[0]);
+            sc->addItem(uNode);
+        }
+        if (vNode == NULL) {
+            vNode = new Node(this, u[1]);
+            sc->addItem(vNode);
+        }
+
         if(!uNode->is_adjacent_with(vNode)){
             qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
             sc->addItem(new Edge(this, uNode, vNode, isDirected));
         }
     }
+
+
+
 
 }
 
@@ -176,12 +202,6 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     //deleting node Shift+leftButton
     if(item_click && QApplication::keyboardModifiers() == Qt::ShiftModifier && event->button() == Qt::LeftButton)
     {
-        for(Edge *edge:item_click->get_edges())
-        {
-            delete edge;
-        }
-       //sc->removeItem(item_click);
-       graph.removeOne(item_click);
        delete item_click;
        emit this->graphChanged();
     }
@@ -195,7 +215,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
         new Node(this, mapToScene( event->pos() ) );
         sc->addItem( graph.back() );
-        //emit this->graphChanged();
+        emit this->graphChanged();
     }
     //if click on graph view, creates new node
 
@@ -213,9 +233,10 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
             if (drawing_edge != NULL) {
 
-                if (!item_click->is_adjacent_with( drawing_edge->get_source_node() )) {
+                if (!drawing_edge->get_source_node()->is_adjacent_with( item_click )) {
                     drawing_edge->disable_following_the_cursor();
                     drawing_edge->set_destination_node(item_click);
+                    drawing_edge->setIsDirected(isDirected);
                     emit this->graphChanged();
                 }
                 else {
@@ -226,7 +247,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
             }
             else {
 
-                drawing_edge = new Edge(this, item_click, mapToScene( event->pos() ), isDirected );
+                drawing_edge = new Edge(this, item_click, mapToScene( event->pos() ), 0 );
                 sc->addItem(drawing_edge);
             }
 
@@ -276,24 +297,232 @@ void GraphWidget::item_is_changed()
     }
 }
 
-
 QVector<Node *> & GraphWidget::get_graph()
 {
     return graph;
 }
-QString GraphWidget::mex(){
-    int mex = 0;
-    QVector<QString> t;
-    for(Node *i:graph)
-        t.push_back(i->get_name());
-    std::sort(t.begin(), t.end());
-    for(QString i:t){
-        if(i != QString::number(mex)){
-            return QString::number(mex);
-        }else{
-            mex++;}
+
+int GraphWidget::mex(){
+
+    QVector<bool> was( cnt_of_nodes );
+    bool is_number = new bool(false);
+    int name;
+
+    for (Node * node : get_graph()) {
+        name = node->get_name().toInt(&is_number, 10);
+
+        if (is_number) {
+
+            if (name >= was.size()) {
+                was.resize(name + 1);
+            }
+
+            was[ name ] = true;
+        }
     }
-    return QString::number(mex);
+
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (!was[ i ]) return  i;
+    }
+
+    return  cnt_of_nodes;
+}
+
+void GraphWidget::adjust_cnt_of_nodes()
+{
+    cnt_of_nodes = get_graph().size();
+
+    qDebug() << cnt_of_nodes;
+}
+
+void GraphWidget::paint_nodes_in_algorithm(Node *cur_node)
+{
+    //first paint nodes
+    for (Node * node : graph) {
+
+        if (node == cur_node) continue;
+        if (used[ node->get_name() ] == 1) node->set_color( QColor("yellow") );
+        if (used[ node->get_name() ] == 2) node->set_color( QColor("red") );
+    }
 }
 
 
+void GraphWidget::start_dfs(QString name)
+{
+    if (timer != nullptr && timer->isActive()) return;
+
+    if (timers.length() <= GraphWidget::DFS) {
+        timers.resize( GraphWidget::DFS + 1 );
+    }
+    if (timers[ GraphWidget::DFS ] == NULL) {
+        timers[ GraphWidget::DFS ] = new QTimer;
+        connect(timers[ GraphWidget::DFS ], SIGNAL( timeout() ), this, SLOT( dfs_iteration() ));
+    }
+
+    timer = timers[ GraphWidget::DFS ];
+
+    nodesColorChange();
+
+    for (Node * node : graph) {
+        used[ node->get_name() ] = 0;
+    }
+
+    Node * start;
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (graph[i]->get_name() == name) {
+            start = graph[i];
+        }
+    }
+
+    if (start == NULL) return;
+
+    nodesColorChange();
+
+    timer->setInterval( algos_time_ms );
+
+    dfs_stack.clear();
+
+    dfs_stack.push_back({ start, start->get_edges().begin() });
+
+    timer->start();
+
+}
+
+void GraphWidget::dfs_iteration()
+{
+
+    if (dfs_stack.isEmpty()) {
+        timer->stop();
+        return;
+    }
+
+    QPair< Node *, QSet< Edge * >::iterator > v = dfs_stack.back();
+    dfs_stack.pop_back();
+
+    v.first->set_color( QColor("green") );
+
+    used[ v.first->get_name() ] = 1;
+
+    Edge * cur_edge;
+
+    QSet<Edge *>::iterator it;
+
+    //first paint nodes
+    paint_nodes_in_algorithm( v.first );
+
+    //then go to other nodes
+
+    for (it = v.second; it != v.first->get_edges().end(); it++) {
+
+        cur_edge = *( it );
+
+
+
+        if (used[ cur_edge->get_source_node()->get_name() ] == 0) {
+
+            dfs_stack.push_back(v);
+            dfs_stack.push_back({ cur_edge->get_source_node(), cur_edge->get_source_node()->get_edges().begin() });
+
+            return;
+        }
+        else if (used[ cur_edge->get_destination_node()->get_name() ] == 0) {
+
+            dfs_stack.push_back(v);
+            dfs_stack.push_back({ cur_edge->get_destination_node(), cur_edge->get_destination_node()->get_edges().begin() });
+
+            return;
+        }
+
+    }
+
+    used[ v.first->get_name() ] = 2;
+
+
+}
+
+
+void GraphWidget::start_bfs(QString name)
+{
+    if (timer != NULL && timer->isActive()) return;
+
+    if (timers.size() <= GraphWidget::BFS) {
+        timers.resize( GraphWidget::BFS + 1 );
+    }
+    if (timers[ GraphWidget::BFS ] == NULL) {
+        timers[ GraphWidget::BFS ] = new QTimer;
+        connect(timers[ GraphWidget::BFS ], SIGNAL( timeout() ), this, SLOT( bfs_iteration() ));
+    }
+
+    timer = timers[ GraphWidget::BFS ];
+
+    nodesColorChange();
+
+
+    for (Node * node : graph) {
+        used[ node->get_name() ] = 0;
+    }
+
+    Node * start;
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (graph[i]->get_name() == name) {
+            start = graph[i];
+        }
+    }
+
+    if (start == NULL) return;
+
+
+
+    bfs_deque.push_back({ start, start->get_edges().begin() });
+    used[ start->get_name() ] = 1;
+
+    timer->setInterval( algos_time_ms );
+    timer->start();
+}
+
+void GraphWidget::bfs_iteration() {
+
+    if (bfs_deque.isEmpty()) {
+        timer->stop();
+        return;
+    }
+
+    QPair< Node *, QSet< Edge * >::iterator > &v = bfs_deque.front();
+
+    v.first->set_color( QColor("green") );
+
+    Edge * cur_edge;
+
+    QSet<Edge *>::iterator it;
+
+    //first paint nodes
+    paint_nodes_in_algorithm(v.first);
+
+    //then go on
+
+    for (it = v.second; it != v.first->get_edges().end(); it++) {
+        cur_edge = *( it );
+
+        if ( used[ cur_edge->get_source_node()->get_name() ] == 0 ) {
+
+            v.second++;
+            bfs_deque.push_back({ cur_edge->get_source_node(), cur_edge->get_source_node()->get_edges().begin() });
+            used[ cur_edge->get_source_node()->get_name() ] = 1;
+
+            return;
+        }
+        if ( used[ cur_edge->get_destination_node()->get_name() ] == 0 ) {
+
+            v.second++;
+            bfs_deque.push_back({ cur_edge->get_destination_node(), cur_edge->get_destination_node()->get_edges().begin() });
+            used[ cur_edge->get_destination_node()->get_name() ] = 1;
+
+            return;
+        }
+
+    }
+
+    bfs_deque.pop_front();
+    used[ v.first->get_name() ] = 2;
+
+}
