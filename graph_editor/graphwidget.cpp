@@ -1,7 +1,6 @@
 #include "graphwidget.h"
 #include "node.h"
 #include "edge.h"
-#include "settings.h"
 #include "mainwindow.h"
 
 #include <QDebug>
@@ -79,19 +78,26 @@ GraphWidget::GraphWidget(QWidget *parent)
     }
 
 }
+void GraphWidget::setDirected(bool isdir){
+    isDirected = isdir;
+    for(Node *node:get_graph())
+        for(Edge *edge:node->get_edges())
+            edge->setIsDirected(isDirected);
 
+    if(isDirected == true){
+        emit this->dirChanged(true);
+    }else{
+        emit this->dirChangedReverse(true);
+    }
+}
 void GraphWidget::setDirected(){
 
     QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
     bool buttonDirValue = false;
     if(but->objectName() == "buttonDirected")
         buttonDirValue = true;
-    isDirected = buttonDirValue;
-    for(Node *node:get_graph())
-        for(Edge *edge:node->get_edges())
-            edge->setIsDirected(buttonDirValue);
+    setDirected(buttonDirValue);
 }
-
 void GraphWidget::nodesColorChange(QString text)
 {
     nodeColor = QColor(text);

@@ -45,6 +45,7 @@ private:
     void saveAs();
     void saveAsPNG();
     void open();
+    QString openGV(QString file);
 
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -59,7 +60,7 @@ private:
 
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;
-    QString fileName;
+    //QString fileName;
 
     QTimer * graph_data_changes_timer;
 };

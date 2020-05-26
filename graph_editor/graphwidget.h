@@ -41,11 +41,14 @@ public:
 signals:
     void graphChanged();
     void edgedAdded(Edge * edge);
+    void dirChanged(bool state);
+    void dirChangedReverse(bool state);
 public slots:
     void graphDraw();
     void nodesColorChange(QString);
     void edgesColorChange(QString);
     void setDirected();
+    void setDirected(bool isdir);
 
 
 protected:

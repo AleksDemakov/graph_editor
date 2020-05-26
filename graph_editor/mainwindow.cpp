@@ -17,6 +17,7 @@ QWidget *loadUi(const QString url) // Return object QWidget
 
     return widget;
 }
+
 MainWindow::MainWindow()
 {
     //items:generate a widget with a .ui file
@@ -37,6 +38,7 @@ MainWindow::MainWindow()
     createMenus();
 
     //containers
+    //formWidget->setMinimumSize(375, 492);
     QWidget *mainContainer = new QWidget;
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
@@ -70,7 +72,8 @@ MainWindow::MainWindow()
     //qDebug() << gwidget->get_graph().size();
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
-
+    connect(gwidget, SIGNAL(dirChanged(bool)), findChild<QRadioButton*>("buttonDirected"), SLOT(setChecked(bool)));
+    connect(gwidget, SIGNAL(dirChangedReverse(bool)), findChild<QRadioButton*>("buttonUndirected"), SLOT(setChecked(bool)));
     emit gwidget->graphChanged();
 }
 
@@ -97,19 +100,60 @@ void MainWindow::open()
     const QString fileName = QFileDialog::getOpenFileName(this);
     if (fileName.isEmpty())
         return;
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly)) {
-        QMessageBox::warning(this, tr("Codecs"),
-                             tr("Cannot read file %1:\n%2")
-                             .arg(QDir::toNativeSeparators(fileName),
-                                  file.errorString()));
-        return;
+
+    QString data;
+
+    if(fileName.contains(".txt")){
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly)) {
+            QMessageBox::warning(this, tr(""),
+                                 tr("Cannot read file %1:\n%2")
+                                 .arg(QDir::toNativeSeparators(fileName),
+                                      file.errorString()));
+            return;
+        }
+        data = file.readAll();
+    }
+    if(fileName.contains(".gv")){
+        data = openGV(fileName);
     }
 
-    const QByteArray data = file.readAll();
 
     ui_textEdit->setPlainText(data);
     //emit gwidget->graphChanged();
+}
+
+QString MainWindow::openGV(QString fileName){
+    QString res="";
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly)) {
+        QMessageBox::warning(this, tr(""),
+                             tr("Cannot read file %1:\n%2")
+                             .arg(QDir::toNativeSeparators(fileName),
+                                  file.errorString()));
+        return "";
+    }
+    QList<QByteArray> strs = file.readAll().split('\n');
+    QByteArray splitter;
+    if(strs[0].contains("digraph ")){
+        gwidget->setDirected(true);
+        splitter = " -> ";
+    }else{
+        gwidget->setDirected(false);
+        splitter = " -- ";
+    }
+
+    //if record contain splitter then add to res
+    for(QByteArray i:strs){
+        if(i.contains(splitter)){
+            QList<QString> t = ((QString)i).split(splitter);
+            t[1].chop(2);
+            res += t[0] + " " + t[1];
+            res += "\n";
+        }
+    }
+
+    return res;
 }
 
 void MainWindow::saveAsPNG(){
@@ -221,25 +265,30 @@ void MainWindow::createMenus()
 QString MainWindow::toDot(QString file) {
     QFileInfo fi(file);
     QString name = fi.baseName();
-    QString resDot;
+    QString resDot, splitter;
 
-
-    resDot = "graph "+ name +"{\n";
-    for(Node *node:gwidget->get_graph()){
-        qDebug()<<node->get_name();
-        resDot += node->get_name() + "\n";
+    if(gwidget->isDirected == true){
+        //if graph directed
+        resDot = "digraph "+ name +"{\n";
+        splitter = " -> ";
+    }else{
+        //if graph not directed
+        resDot = "graph "+ name +"{\n";
+        splitter = " -- ";
     }
-    for(Node *node:gwidget->get_graph()){
 
+    //print all nodes
+    for(Node *node:gwidget->get_graph())
+        resDot += node->get_name() + "\n";
+    //print edges
+    for(Node *node:gwidget->get_graph()){
         for(Edge *edge:node->get_edges()){
             if(node == edge->get_destination_node())continue;
-            //qDebug()<< node->get_name() +" " +edge->get_destination_node()->get_name();
-            resDot += node->get_name() + " -- ";
+            resDot += node->get_name() + splitter;
             resDot += edge->get_destination_node()->get_name()+";\n";
         }
     }
     resDot += "}";
-    //qDebug()<<resDot;
     return resDot;
 }
 
