@@ -71,7 +71,6 @@ MainWindow::MainWindow()
 
     connect(findChild<QRadioButton*>("weighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
     connect(findChild<QRadioButton*>("unweighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
-
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(gwidget, SIGNAL(dirChanged(bool)), findChild<QRadioButton*>("buttonDirected"), SLOT(setChecked(bool)));
@@ -84,6 +83,11 @@ void MainWindow::graphWrite()
 {
     QVector <Node *> tgraph = gwidget->get_graph();
     QString str = "";
+
+    for(Node *i:tgraph){
+        if(i->get_edges().size()==0)
+            str = str + i->get_name() + "\n";
+    }
 
     for(int i = 0; i < tgraph.size(); i++){
         for(Edge * j:tgraph[i]->get_edges()){
@@ -121,7 +125,7 @@ void MainWindow::open()
         data = file.readAll();
     }
     if(fileName.contains(".gv")){
-        data = openGV(fileName);
+        data = openDot(fileName);
     }
 
 
@@ -129,7 +133,7 @@ void MainWindow::open()
     //emit gwidget->graphChanged();
 }
 
-QString MainWindow::openGV(QString fileName){
+QString MainWindow::openDot(QString fileName){
     QString res="";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
@@ -150,11 +154,32 @@ QString MainWindow::openGV(QString fileName){
     }
 
     //if record contain splitter then add to res
+    QString weight;
     for(QByteArray i:strs){
         if(i.contains(splitter)){
+            weight="";
             QList<QString> t = ((QString)i).split(splitter);
-            t[1].chop(2);
-            res += t[0] + " " + t[1];
+
+            if(t[1].contains("[label")){
+                res+=t[0]+" ";
+                for(int i=0;i<t[1].indexOf('[');i++){
+                    res += t[1][i];
+                }
+                for(int i=t[1].indexOf('=')+1;i<t[1].size();i++){
+                    if(t[1][i] == "]" || t[1][i] == ";")
+                        break;
+                    else
+                        weight += t[1][i];
+                }
+                res += " " + weight;
+            }else{
+                t[1].chop(2);
+                res += t[0] + " " + t[1];
+            }
+            res += "\n";
+        }else if(!i.contains('{') && !i.contains('}')
+                 && !i.contains('[') && !i.contains(']')){
+            res += i;
             res += "\n";
         }
     }
@@ -271,7 +296,7 @@ void MainWindow::createMenus()
 QString MainWindow::toDot(QString file) {
     QFileInfo fi(file);
     QString name = fi.baseName();
-    QString resDot, splitter;
+    QString resDot, splitter, label;
 
     if(gwidget->isDirected == true){
         //if graph directed
@@ -291,7 +316,10 @@ QString MainWindow::toDot(QString file) {
         for(Edge *edge:node->get_edges()){
             if(node == edge->get_destination_node())continue;
             resDot += node->get_name() + splitter;
-            resDot += edge->get_destination_node()->get_name()+";\n";
+            resDot += edge->get_destination_node()->get_name();
+            if(gwidget->isWeighted)
+                resDot += " [label ="+ QString::number(edge->get_weight()) +" ]";
+            resDot += ";\n";
         }
     }
     resDot += "}";

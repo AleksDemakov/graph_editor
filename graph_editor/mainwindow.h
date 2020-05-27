@@ -45,7 +45,7 @@ private:
     void saveAs();
     void saveAsPNG();
     void open();
-    QString openGV(QString file);
+    QString openDot(QString file);
 
     QMenu *fileMenu;
     QMenu *editMenu;
