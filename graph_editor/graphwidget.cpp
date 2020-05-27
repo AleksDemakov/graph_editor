@@ -91,12 +91,23 @@ void GraphWidget::setDirected(bool isdir){
     }
 }
 void GraphWidget::setDirected(){
-
     QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
     bool buttonDirValue = false;
     if(but->objectName() == "buttonDirected")
         buttonDirValue = true;
     setDirected(buttonDirValue);
+}
+void GraphWidget::setWeighted(bool isW){
+    isWeighted = isW;
+    emit graphChanged();
+}
+//Weights
+void GraphWidget::setWeighted(){
+    QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
+    bool buttonDirValue = false;
+    if(but->objectName() == "weighted")
+        buttonDirValue = true;
+    setWeighted(buttonDirValue);
 }
 void GraphWidget::nodesColorChange(QString text)
 {
@@ -127,7 +138,7 @@ void GraphWidget::graphDraw()
 
 
 
-
+    //edge deleting
     QVector<Node*> odd;
 
     for(Node *i:graph){
@@ -144,17 +155,22 @@ void GraphWidget::graphDraw()
 
 
 
-
+//    draw graph by data
+//    uNode - first node in line
+//    vNode - second node in line
+//    weight - third record in line, weight
     Node *uNode, *vNode;
+    QString weight;
     for(QString edge:edges){
+        if(!edge.contains(' ') || *edge.end() == ' ')continue;
         uNode=NULL;
         vNode=NULL;
-        if(!edge.contains(' ') || *edge.end() == ' ')continue;
-
+        weight=1;
         QList<QString> u = edge.split(' ');
         if(u[1]=="")continue;
-        //qDebug()<<u;
-
+        if(u.size()==3){
+            weight = u[2];
+        }
 
         for(Node *i:graph){
 
@@ -176,8 +192,16 @@ void GraphWidget::graphDraw()
         }
 
         if(!uNode->is_adjacent_with(vNode)){
-            qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
-            sc->addItem(new Edge(this, uNode, vNode, isDirected));
+            //edge do not exist
+            //qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
+            sc->addItem(new Edge(this, uNode, vNode, isDirected, weight.toInt()));
+        }else{
+            //edge exist
+            Edge * t = uNode->get_edge(vNode);
+            if(u.size()==3 && weight.toInt() != t->get_weight()){
+
+                t->set_weight(weight.toInt());
+            }
         }
     }
 
@@ -338,7 +362,7 @@ void GraphWidget::adjust_cnt_of_nodes()
 {
     cnt_of_nodes = get_graph().size();
 
-    qDebug() << cnt_of_nodes;
+    //qDebug() << cnt_of_nodes;
 }
 
 void GraphWidget::paint_nodes_in_algorithm(Node *cur_node)

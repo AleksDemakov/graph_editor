@@ -26,6 +26,7 @@ public:
     QVector<Node *> &get_graph();
     QGraphicsScene *sc;
     bool isDirected;
+    bool isWeighted;
     QColor edgeColor;
     QColor nodeColor;
     double edge_length = 110;
@@ -49,6 +50,8 @@ public slots:
     void edgesColorChange(QString);
     void setDirected();
     void setDirected(bool isdir);
+    void setWeighted();
+    void setWeighted(bool isdir);
 
 
 protected:

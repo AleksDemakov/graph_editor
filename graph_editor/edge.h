@@ -9,13 +9,15 @@ class GraphWidget;
 
 class Edge: public QGraphicsItem {
 public:
-    Edge(GraphWidget *graphWidget,Node * source, Node * destination, bool isDir);
+    Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir);
+    Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir, int weight);
     Edge(GraphWidget *graphWidget, Node * source, QPointF destPoint, bool isDir);
     ~Edge();
 
     Node * get_source_node() const;
     Node * get_destination_node() const;
     void set_destination_node(Node * destination);
+    void set_weight(int weight);
 
     void adjust();
     void adjust(QPointF pos);
@@ -25,6 +27,8 @@ public:
     bool getIsDirected();
     void setIsDirected(bool dir);
     void disable_following_the_cursor();
+    int get_weight();
+
 public slots:
     void set_color(QColor new_color);
 
@@ -34,6 +38,7 @@ protected:
 
 
 private:
+    int weight;
     GraphWidget *graph;
     QPainterPath shape() const override;
 

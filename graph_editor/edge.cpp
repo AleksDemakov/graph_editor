@@ -8,16 +8,17 @@
 #include <QtMath>
 
 
-Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir) {
+Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir)
+    :Edge(graphWidget, source, destination, isDir, 1)
+{
+}
 
+Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir, int weight) {
     if (source == NULL || destination == NULL) return;
     this->graph = graphWidget;
     this->source = source;
     this->destination = destination;
-
-
     setCacheMode(DeviceCoordinateCache);
-
 
     this->setIsDirected(isDir);
 
@@ -25,14 +26,13 @@ Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isD
     setAcceptedMouseButtons(Qt::NoButton);
 
     //addes this edge to nodes' edge lists
+    this->set_weight(weight);
     this->setIsDirected(isDir);
     this->set_color(this->graph->edgeColor);
     source->add_edge(this);
     destination->add_edge(this);
     adjust();
 }
-
-
 
 Edge::Edge(GraphWidget *graphWidget,Node * source, QPointF destPoint, bool isDir) {
     if (source == NULL) return;
@@ -61,7 +61,7 @@ Edge::~Edge() {
     if(scene() != NULL)
         scene()->removeItem(this);
 
-    qDebug() << "EDGE DELETED OGO";
+    //qDebug() << "EDGE DELETED OGO";
 }
 
 
@@ -170,7 +170,9 @@ void Edge::set_color(QColor new_color)
     color = new_color;
     update();
 }
-
+void Edge::set_weight(int weight){
+    this->weight = weight;
+}
 
 QPainterPath Edge::shape() const
 {
@@ -191,7 +193,9 @@ QPainterPath Edge::shape() const
     return  path;
 
 }
-
+int Edge::get_weight(){
+    return weight;
+}
 bool Edge::getIsDirected(){
     return isDirected;
 }

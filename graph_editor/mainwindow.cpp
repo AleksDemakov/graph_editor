@@ -21,7 +21,8 @@ QWidget *loadUi(const QString url) // Return object QWidget
 MainWindow::MainWindow()
 {
     //items:generate a widget with a .ui file
-    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
+    QWidget *formWidget = loadUi("tabwidget.ui");
+    //"../graph_editor/tabwidget.ui"
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
@@ -66,10 +67,11 @@ MainWindow::MainWindow()
     connect(gwidget, SIGNAL(graphChanged()), this, SLOT(graphWrite()));
     connect(start_dfs_button, SIGNAL(clicked()), this, SLOT( start_dfs() ) );
     connect(start_bfs_button, SIGNAL(clicked()), this, SLOT( start_bfs() ) );
-
     //connect(gwidget, SIGNAL(edgeAdded(Edge * edge)), this, SLOT( addEdgeToGraphData(Edge * edge) ) );
 
-    //qDebug() << gwidget->get_graph().size();
+    connect(findChild<QRadioButton*>("weighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
+    connect(findChild<QRadioButton*>("unweighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
+
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(gwidget, SIGNAL(dirChanged(bool)), findChild<QRadioButton*>("buttonDirected"), SLOT(setChecked(bool)));
@@ -89,7 +91,11 @@ void MainWindow::graphWrite()
                 continue;
 
             str = str + tgraph[i]->get_name() + " ";
-            str = str + j->get_destination_node()->get_name() + "\n";
+            str = str + j->get_destination_node()->get_name();
+            if(gwidget->isWeighted)
+                str = str + " " + QString::number(j->get_weight());
+            str = str + "\n";
+            //qDebug()<<"!-"<<j->get_weight();
         }
     }
     ui_textEdit->setText(str);
