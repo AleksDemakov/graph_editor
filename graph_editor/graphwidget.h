@@ -25,7 +25,8 @@ public:
     void item_is_changed();
     QVector<Node *> &get_graph();
     QGraphicsScene *sc;
-    bool isDirected;
+    bool isDirected=false;
+    bool isWeighted=false;
     QColor edgeColor;
     QColor nodeColor;
     double edge_length = 110;
@@ -41,11 +42,16 @@ public:
 signals:
     void graphChanged();
     void edgedAdded(Edge * edge);
+    void dirChanged(bool state);
+    void dirChangedReverse(bool state);
 public slots:
     void graphDraw();
     void nodesColorChange(QString);
     void edgesColorChange(QString);
     void setDirected();
+    void setDirected(bool isdir);
+    void setWeighted();
+    void setWeighted(bool isdir);
 
 
 protected:

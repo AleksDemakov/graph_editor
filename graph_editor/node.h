@@ -32,6 +32,7 @@ public:
 
     QSet<Edge *> & get_edges();
     QString get_name();
+    Edge *get_edge(Node *to);
     void set_name(QString new_name);
 
 public slots:

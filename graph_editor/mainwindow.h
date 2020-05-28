@@ -42,9 +42,15 @@ class MainWindow : public QMainWindow
 private:
     void createActions();
     void createMenus();
+    void save();
     void saveAs();
     void saveAsPNG();
     void open();
+    void about();
+
+    void saveFile();
+
+    QString openDot(QString file);
 
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -56,6 +62,7 @@ private:
     QAction *saveAsAct;
     QAction *saveAsPNGAct;
     QAction *exitAct;
+    QAction *aboutAct;
 
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;

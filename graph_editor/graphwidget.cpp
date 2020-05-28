@@ -1,7 +1,6 @@
 #include "graphwidget.h"
 #include "node.h"
 #include "edge.h"
-#include "settings.h"
 #include "mainwindow.h"
 
 #include <QDebug>
@@ -79,19 +78,37 @@ GraphWidget::GraphWidget(QWidget *parent)
     }
 
 }
+void GraphWidget::setDirected(bool isdir){
+    isDirected = isdir;
+    for(Node *node:get_graph())
+        for(Edge *edge:node->get_edges())
+            edge->setIsDirected(isDirected);
 
+    if(isDirected == true){
+        emit this->dirChanged(true);
+    }else{
+        emit this->dirChangedReverse(true);
+    }
+}
 void GraphWidget::setDirected(){
-
     QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
     bool buttonDirValue = false;
     if(but->objectName() == "buttonDirected")
         buttonDirValue = true;
-    isDirected = buttonDirValue;
-    for(Node *node:get_graph())
-        for(Edge *edge:node->get_edges())
-            edge->setIsDirected(buttonDirValue);
+    setDirected(buttonDirValue);
 }
-
+void GraphWidget::setWeighted(bool isW){
+    isWeighted = isW;
+    emit graphChanged();
+}
+//Weights
+void GraphWidget::setWeighted(){
+    QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
+    bool buttonDirValue = false;
+    if(but->objectName() == "weighted")
+        buttonDirValue = true;
+    setWeighted(buttonDirValue);
+}
 void GraphWidget::nodesColorChange(QString text)
 {
     nodeColor = QColor(text);
@@ -119,17 +136,25 @@ void GraphWidget::graphDraw()
 
     QList<QString> edges = gtext->toPlainText().split('\n');
 
+    //this is an inspector,
+    //that checks all nodes are in data and at scene
+    QMap<Node*, bool> inspect;
 
-
-
-    QVector<Node*> odd;
+    //edge deleting
+    QStack<Edge*> odd;
 
     for(Node *i:graph){
+        inspect[i] = false;
         for(Edge *j:i->get_edges()){
 
             if (j->get_destination_node() == NULL || j->get_source_node() == NULL) continue;
 
-            if(!edges.contains(j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name())){
+            if(!edges.contains(j->get_source_node()->get_name()+
+                               " "+j->get_destination_node()->get_name()+" "+j->get_weight_str())
+                    &&
+                    !edges.contains(j->get_source_node()->get_name()+
+                                                   " "+j->get_destination_node()->get_name())
+                    ){
                 delete j;
             }
         }
@@ -138,28 +163,56 @@ void GraphWidget::graphDraw()
 
 
 
-
+//    draw graph by data
+//    uNode - first node in line
+//    vNode - second node in line
+//    weight - third record in line, weight
     Node *uNode, *vNode;
-    for(QString edge:edges){
+    QString weight;
+
+    for(QString edge:edges) {
+        //if(/*!edge.contains(' ') || */*edge.end() == ' ')continue;
         uNode=NULL;
         vNode=NULL;
-        if(!edge.contains(' ') || *edge.end() == ' ')continue;
-
+        weight=1;
         QList<QString> u = edge.split(' ');
-        if(u[1]=="")continue;
-        //qDebug()<<u;
 
+        // if it is a single node
+        if(!edge.contains(' ') || u[1]=="" ){
+            bool ch=false;
+            for(Node *i:graph){
+                if(i->get_name() == u[0]){
+                    inspect[i]=true;
+                    ch = true;
+                    break;
+                }
+            }
+            if(ch==false && u[0]!=""){
+                uNode = new Node(this, u[0]);
+                sc->addItem(uNode);
+            }
+            continue;
+        }
+
+        // if there are two nodes
+        if(u.size()==3){
+            weight = u[2];
+        }
 
         for(Node *i:graph){
-
-            if(i->get_name() == u[1]){
-                vNode = i;
-            }
             if(i->get_name() == u[0]){
+                inspect[i]=true;
                 uNode = i;
+            }
+            if(i->get_name() == u[1]){
+                inspect[i]=true;
+                vNode = i;
             }
         }
 
+
+        if(u[0] == u[1])
+            continue;
         if (uNode == NULL) {
             uNode = new Node(this, u[0]);
             sc->addItem(uNode);
@@ -170,12 +223,23 @@ void GraphWidget::graphDraw()
         }
 
         if(!uNode->is_adjacent_with(vNode)){
-            qDebug()<<uNode->get_name()<<" "<<vNode->get_name();
-            sc->addItem(new Edge(this, uNode, vNode, isDirected));
+            //edge do not exist
+            sc->addItem(new Edge(this, uNode, vNode, isDirected, weight.toInt()));
+        }else{
+            //edge exist
+            Edge * t = uNode->get_edge(vNode);
+            if(u.size()==3 && weight.toInt() != t->get_weight()){
+
+                t->set_weight(weight.toInt());
+            }
         }
     }
 
-
+    //inspector delete odd nodes
+    QMap<Node*, bool>::iterator i;
+    for (i = inspect.begin(); i != inspect.end(); ++i)
+        if(i.value()==false)
+            delete i.key();
 
 
 }
@@ -332,7 +396,7 @@ void GraphWidget::adjust_cnt_of_nodes()
 {
     cnt_of_nodes = get_graph().size();
 
-    qDebug() << cnt_of_nodes;
+    //qDebug() << cnt_of_nodes;
 }
 
 void GraphWidget::paint_nodes_in_algorithm(Node *cur_node)
