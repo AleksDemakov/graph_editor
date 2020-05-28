@@ -21,14 +21,17 @@ QWidget *loadUi(const QString url) // Return object QWidget
 MainWindow::MainWindow()
 {
     //items:generate a widget with a .ui file
-    QWidget *formWidget = loadUi("tabwidget.ui");
+    QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //"../graph_editor/tabwidget.ui"
+
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
 
     gwidget = new GraphWidget(this);
+    // !
     gwidget->setFixedSize(500, 500);
+    //gwidget->setMinimumSize(500, 500);
 
 
     graph_data_changes_timer = new QTimer;
@@ -39,7 +42,7 @@ MainWindow::MainWindow()
     createMenus();
 
     //containers
-    //formWidget->setMinimumSize(375, 492);
+    formWidget->setMinimumSize(375, 492);
     QWidget *mainContainer = new QWidget;
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
@@ -48,6 +51,7 @@ MainWindow::MainWindow()
     mainContainer->setLayout(mainLayout);
 
     this->setCentralWidget(mainContainer);
+    // !
     this->setFixedSize(1000, 600);
 
     QRadioButton *but  = findChild<QRadioButton*>("buttonDirected");
@@ -186,7 +190,15 @@ QString MainWindow::openDot(QString fileName){
 
     return res;
 }
-
+void MainWindow::about()
+{
+   QMessageBox::about(this, tr("About Application"),
+            tr("This application allows to construct graphs"
+               "<ul><li><b>Left Click</b> on the right veiw creates a node</li>"
+               "<li><b>Right Click</b> on node creates edge from it,"
+               " Second right click makes two nodes connected</li>"
+               "<li><b> Shift + Left Click</b> delete items</li></ul>"));
+}
 void MainWindow::saveAsPNG(){
     const QString title = tr("Save As PNG(%1)");
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -200,6 +212,17 @@ void MainWindow::saveAsPNG(){
     scene->render(&painter);
     image.save(fileName);
 }
+
+void MainWindow::save(){
+    if(fileName == NULL){
+        saveAs();
+        return;
+    }
+    saveFile();
+}
+
+
+
 void MainWindow::saveAs(){
     const QString title = tr("Save As (%1)");
 
@@ -207,7 +230,11 @@ void MainWindow::saveAs(){
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save graph"), "",
         tr("text (*.txt);; dot (*.gv);;Image (*.png);;All Files (*)"));
+    this->fileName = fileName;
+    saveFile();
 
+}
+void MainWindow::saveFile(){
     if(fileName.contains(".png")){
         QGraphicsScene *scene = gwidget->sc;
         QImage image(gwidget->size(), QImage::Format_ARGB32);
@@ -249,14 +276,20 @@ void MainWindow::saveAs(){
         out << toDot(fileName);
         return;
     }
-
 }
+
+
 
 void MainWindow::createActions(){
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, &QAction::triggered, this, &QWidget::close);
+
+    saveAct = new QAction(tr("&Save"), this);
+    saveAct->setStatusTip(tr("Save"));
+    saveAct->setShortcuts(QKeySequence::Save);
+    connect(saveAct, &QAction::triggered, this, &MainWindow::save);
 
     saveAsAct = new QAction(tr("&Save As.."), this);
     saveAsAct->setStatusTip(tr("Save As"));
@@ -270,6 +303,10 @@ void MainWindow::createActions(){
     openAct->setShortcuts(QKeySequence::Open);
     openAct->setStatusTip("Open");
     connect(openAct, &QAction::triggered, this, &MainWindow::open);
+
+    aboutAct = new QAction(tr("&about"), this);
+    connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
+
 }
 
 void MainWindow::createMenus()
@@ -277,6 +314,7 @@ void MainWindow::createMenus()
     fileMenu = menuBar()->addMenu(tr("&File"));
 
     fileMenu->addAction(openAct);
+    fileMenu->addAction(saveAct);
     fileMenu->addAction(saveAsAct);
     fileMenu->addAction(saveAsPNGAct);
 
@@ -284,11 +322,12 @@ void MainWindow::createMenus()
 
     fileMenu->addAction(exitAct);
 
-    editMenu = menuBar()->addMenu(tr("&Edit"));
+    /*editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addSeparator();
-    editMenu->addSeparator();
+    editMenu->addSeparator();*/
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(aboutAct);
 
 }
 

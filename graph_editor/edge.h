@@ -28,6 +28,7 @@ public:
     void setIsDirected(bool dir);
     void disable_following_the_cursor();
     int get_weight();
+    QString get_weight_str();
 
 public slots:
     void set_color(QColor new_color);

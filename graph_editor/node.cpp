@@ -231,13 +231,17 @@ void Node::calculateForces() {
 
     //QRectF sceneRect = scene()->sceneRect();
 
-    //qDebug() << sceneRect.left() << sceneRect.right() << this->pos();
-
+    //qDebug() << scene()->sceneRect()<<endl<<graph->size();
+    QRectF sceneRect = scene()->sceneRect();
     new_calculated_pos = pos() + QPointF(xvel, yvel);
+    new_calculated_pos.setX(qMin(qMax(new_calculated_pos.x(), sceneRect.left() + 10), sceneRect.right() - 10));
+    new_calculated_pos.setY(qMin(qMax(new_calculated_pos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10));
+
+    /*new_calculated_pos = pos() + QPointF(xvel, yvel);
     new_calculated_pos.setX( qMax( new_calculated_pos.x(), -300.0 ) );
     new_calculated_pos.setX( qMin( new_calculated_pos.x(), 300.0 ) );
     new_calculated_pos.setY( qMax( new_calculated_pos.y(), -300.0 ) );
-    new_calculated_pos.setY( qMin( new_calculated_pos.y(), 300.0 ) );
+    new_calculated_pos.setY( qMin( new_calculated_pos.y(), 300.0 ) );*/
 }
 QSet<Edge *> & Node::get_edges()
 {

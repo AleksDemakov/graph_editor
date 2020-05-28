@@ -141,7 +141,7 @@ void GraphWidget::graphDraw()
     QMap<Node*, bool> inspect;
 
     //edge deleting
-    QVector<Node*> odd;
+    QStack<Edge*> odd;
 
     for(Node *i:graph){
         inspect[i] = false;
@@ -149,7 +149,12 @@ void GraphWidget::graphDraw()
 
             if (j->get_destination_node() == NULL || j->get_source_node() == NULL) continue;
 
-            if(!edges.contains(j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name())){
+            if(!edges.contains(j->get_source_node()->get_name()+
+                               " "+j->get_destination_node()->get_name()+" "+j->get_weight_str())
+                    &&
+                    !edges.contains(j->get_source_node()->get_name()+
+                                                   " "+j->get_destination_node()->get_name())
+                    ){
                 delete j;
             }
         }
