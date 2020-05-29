@@ -244,10 +244,10 @@ QPainterPath Edge::shape() const
 
 int Edge::get_weight(){
     return weight;
-
+}
 QString Edge::get_weight_str(){
     return QString::number(weight);
-
+}
 bool Edge::getIsDirected(){
     return isDirected;
 }

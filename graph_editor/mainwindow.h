@@ -67,7 +67,7 @@ private:
 
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;
-    //QString fileName;
+    QString fileName = NULL;
 
     QTimer * graph_data_changes_timer;
 };
