@@ -13,8 +13,7 @@ Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isD
 {
 }
 
-Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir, int weight)
-{
+Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isDir, int weight) {
     if (source == NULL || destination == NULL) return;
     this->graph = graphWidget;
     this->source = source;
@@ -38,8 +37,6 @@ Edge::Edge(GraphWidget *graphWidget, Node * source, Node * destination, bool isD
     this->set_weight(weight);
     this->setIsDirected(isDir);
     this->set_color(this->graph->edgeColor);
-
-
 
     adjust();
 }
@@ -84,9 +81,7 @@ Edge::~Edge() {
     }
 
     if (weight_label->scene() != nullptr) graph->scene()->removeItem( weight_label );
-
-
-    //qDebug() << "EDGE DELETED OGO";
+   
 }
 
 
@@ -221,10 +216,10 @@ void Edge::set_color(QColor new_color)
     color = new_color;
     update();
 }
-
 void Edge::set_weight(int weight){
     this->weight = weight;
     weight_label->setText( QString::number( weight ) );
+
 }
 
 QPainterPath Edge::shape() const
@@ -249,7 +244,9 @@ QPainterPath Edge::shape() const
 
 int Edge::get_weight(){
     return weight;
-}
+
+QString Edge::get_weight_str(){
+    return QString::number(weight);
 
 bool Edge::getIsDirected(){
     return isDirected;
