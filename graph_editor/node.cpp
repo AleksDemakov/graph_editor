@@ -51,6 +51,7 @@ Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
 Node::Node(GraphWidget *graphWidget, QPointF pos)
     : Node(graphWidget, QString::number(graphWidget->mex()))//
 {
+    //qDebug()<<pos;
     this->setPos( pos );
 
 }
@@ -154,12 +155,22 @@ void Node::add_edge(Edge * edge) {
 
 bool Node::is_adjacent_with(Node * node) {
     for (Edge * edge : edges) {
-        if ( (!graph->isDirected && edge->get_source_node() == node) || edge->get_destination_node() == node) return true;
+        if ( (!graph->isDirected && edge->get_source_node() == node)
+             || edge->get_destination_node() == node) return true;
     }
 
     return  false;
 }
-
+Edge * Node::get_edge( Node *to){
+    for (Edge * edge : edges) {
+        if ( (!graph->isDirected && (edge->get_source_node() == to
+             || edge->get_destination_node() == to))
+             || (edge->get_destination_node() == to)) {
+               return edge;
+        }
+    }
+    return  NULL;
+}
 bool Node::advancePosition() {
     if (new_calculated_pos == this->pos()) {
         return false;
@@ -218,7 +229,7 @@ void Node::calculateForces() {
 
 
 
-    QRectF sceneRect = scene()->sceneRect();
+    //QRectF sceneRect = scene()->sceneRect();
 
     //qDebug() << sceneRect.left() << sceneRect.right() << this->pos();
 

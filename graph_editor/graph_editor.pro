@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    algorithms.cpp \
     edge.cpp \
     main.cpp \
     graphwidget.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
     node.cpp
 
 HEADERS += \
+    algorithms.h \
     edge.h \
     graphwidget.h \
     mainwindow.h \
