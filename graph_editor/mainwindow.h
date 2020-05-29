@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow
 
         void start_dfs();
         void start_bfs();
+        void start_dijkstra();
 
     private slots:
         void start_graph_data_changes_timer();
@@ -66,7 +67,7 @@ private:
 
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;
-    QString fileName;
+    //QString fileName;
 
     QTimer * graph_data_changes_timer;
 };

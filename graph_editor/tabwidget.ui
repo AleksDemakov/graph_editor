@@ -254,7 +254,9 @@
     <attribute name="title">
      <string>Algorithms</string>
     </attribute>
+
     <widget class="QGroupBox" name="groupBox_3">
+
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -337,6 +339,42 @@
        <string>start node</string>
       </property>
      </widget>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>start node</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dijkstra_button">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>120</y>
+       <width>80</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>dijkstra</string>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
     </widget>
    </widget>
   </widget>

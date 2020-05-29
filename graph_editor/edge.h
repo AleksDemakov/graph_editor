@@ -28,7 +28,13 @@ public:
     void setIsDirected(bool dir);
     void disable_following_the_cursor();
     int get_weight();
+
+
+    void show_weight_label();
+    void hide_weight_label();
+    bool weight_label_is_on_scene();
     QString get_weight_str();
+
 
 public slots:
     void set_color(QColor new_color);
@@ -39,7 +45,7 @@ protected:
 
 
 private:
-    int weight;
+    int weight = 1;
     GraphWidget *graph;
     QPainterPath shape() const override;
 
@@ -52,6 +58,8 @@ private:
 
     qreal penWidth = 1.9;
     qreal extra = (penWidth + 15 ) / 2.0;
+
+    QGraphicsSimpleTextItem * weight_label = nullptr;
 
 };
 

@@ -5,9 +5,11 @@
 #include <QSet>
 #include <QStack>
 #include <QQueue>
+#include <qthread.h>
 
 class Edge;
 class Node;
+class Algorithms;
 
 class GraphWidget : public QGraphicsView
 {
@@ -25,8 +27,8 @@ public:
     void item_is_changed();
     QVector<Node *> &get_graph();
     QGraphicsScene *sc;
-    bool isDirected=false;
-    bool isWeighted=false;
+    bool isDirected = false;
+    bool isWeighted = false;
     QColor edgeColor;
     QColor nodeColor;
     double edge_length = 110;
@@ -36,8 +38,11 @@ public:
 
     void start_dfs(QString name);
     void start_bfs(QString name);
+    void start_dijkstra(QString name);
 
     void adjust_cnt_of_nodes();
+
+
 
 signals:
     void graphChanged();
@@ -53,6 +58,9 @@ public slots:
     void setWeighted();
     void setWeighted(bool isdir);
 
+    void disconnect_thread();
+
+
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -66,23 +74,13 @@ private:
     bool drawing_an_edge;
     Edge * drawing_edge;
     QVector<Node *> graph;
-    std::map<QString, int> used;
-
-    QList< QPair<Node *, QSet< Edge * >::iterator > > dfs_stack;
-    QList< QPair<Node *, QSet< Edge * >::iterator > > bfs_deque;
-
-    QVector< QTimer * > timers;
-    QTimer * timer;
-    int algos_time_ms = 2000;
 
     int timerId = 0;
 
     void paint_nodes_in_algorithm( Node * cur_node );
+    QThread algos_thread;
+    Algorithms * alg;
 
-
-private slots:
-    void dfs_iteration();
-    void bfs_iteration();
 
 };
 #endif // MAINWINDOW_H

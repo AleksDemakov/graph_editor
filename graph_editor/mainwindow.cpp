@@ -43,6 +43,7 @@ MainWindow::MainWindow()
 
     //containers
     formWidget->setMinimumSize(375, 492);
+
     QWidget *mainContainer = new QWidget;
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
@@ -75,10 +76,15 @@ MainWindow::MainWindow()
 
     connect(findChild<QRadioButton*>("weighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
     connect(findChild<QRadioButton*>("unweighted"), SIGNAL(pressed()), gwidget, SLOT(setWeighted()));
+
     connect(findChild<QRadioButton*>("buttonDirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(gwidget, SIGNAL(dirChanged(bool)), findChild<QRadioButton*>("buttonDirected"), SLOT(setChecked(bool)));
     connect(gwidget, SIGNAL(dirChangedReverse(bool)), findChild<QRadioButton*>("buttonUndirected"), SLOT(setChecked(bool)));
+
+    connect(findChild<QPushButton *>("dijkstra_button"), SIGNAL(clicked()), this, SLOT( start_dijkstra() ) );
+
+
     emit gwidget->graphChanged();
 }
 
@@ -129,7 +135,9 @@ void MainWindow::open()
         data = file.readAll();
     }
     if(fileName.contains(".gv")){
+
         data = openDot(fileName);
+
     }
 
 
@@ -137,7 +145,9 @@ void MainWindow::open()
     //emit gwidget->graphChanged();
 }
 
+
 QString MainWindow::openDot(QString fileName){
+
     QString res="";
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly)) {
@@ -158,6 +168,7 @@ QString MainWindow::openDot(QString fileName){
     }
 
     //if record contain splitter then add to res
+
     QString weight;
     for(QByteArray i:strs){
         if(i.contains(splitter)){
@@ -184,11 +195,13 @@ QString MainWindow::openDot(QString fileName){
         }else if(!i.contains('{') && !i.contains('}')
                  && !i.contains('[') && !i.contains(']')){
             res += i;
+
             res += "\n";
         }
     }
 
     return res;
+
 }
 void MainWindow::about()
 {
@@ -198,6 +211,7 @@ void MainWindow::about()
                "<li><b>Right Click</b> on node creates edge from it,"
                " Second right click makes two nodes connected</li>"
                "<li><b> Shift + Left Click</b> delete items</li></ul>"));
+
 }
 void MainWindow::saveAsPNG(){
     const QString title = tr("Save As PNG(%1)");
@@ -335,7 +349,9 @@ void MainWindow::createMenus()
 QString MainWindow::toDot(QString file) {
     QFileInfo fi(file);
     QString name = fi.baseName();
+
     QString resDot, splitter, label;
+
 
     if(gwidget->isDirected == true){
         //if graph directed
@@ -359,6 +375,7 @@ QString MainWindow::toDot(QString file) {
             if(gwidget->isWeighted)
                 resDot += " [label ="+ QString::number(edge->get_weight()) +" ]";
             resDot += ";\n";
+
         }
     }
     resDot += "}";
@@ -387,4 +404,10 @@ void MainWindow::start_graph_data_changes_timer()
     graph_data_changes_timer->setSingleShot(true);
 
     graph_data_changes_timer->start();
+}
+
+void MainWindow::start_dijkstra()
+{
+    QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
+    gwidget->start_dijkstra( start_vertex->text() );
 }

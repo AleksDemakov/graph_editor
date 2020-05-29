@@ -231,6 +231,7 @@ void Node::calculateForces() {
 
     //QRectF sceneRect = scene()->sceneRect();
 
+
     //qDebug() << scene()->sceneRect()<<endl<<graph->size();
     QRectF sceneRect = scene()->sceneRect();
     new_calculated_pos = pos() + QPointF(xvel, yvel);

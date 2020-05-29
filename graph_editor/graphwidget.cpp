@@ -2,6 +2,7 @@
 #include "node.h"
 #include "edge.h"
 #include "mainwindow.h"
+#include "algorithms.h"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -30,10 +31,14 @@ GraphWidget::GraphWidget(QWidget *parent)
 
     drawing_an_edge = false;
     drawing_edge = NULL;
+
     font = QFont("serif");
+    font.setPointSize(9);
 
-    timer = nullptr;
-
+    //create thread and object for algos
+    alg = new Algorithms(this);
+    alg->moveToThread( &algos_thread );
+    connect( alg, SIGNAL( finished() ), this, SLOT( disconnect_thread() ) );
 
     int cnt = QRandomGenerator::global()->bounded(2, 10);
 
@@ -99,6 +104,13 @@ void GraphWidget::setDirected(){
 }
 void GraphWidget::setWeighted(bool isW){
     isWeighted = isW;
+    for (Node * node : graph) {
+        for (Edge * edge : node->get_edges()) {
+            if (isWeighted) edge->show_weight_label();
+            else edge->hide_weight_label();
+        }
+    }
+
     emit graphChanged();
 }
 //Weights
@@ -114,6 +126,7 @@ void GraphWidget::nodesColorChange(QString text)
     nodeColor = QColor(text);
     nodesColorChange();
 }
+
 void GraphWidget::nodesColorChange()
 {
     for(Node* i:get_graph()){
@@ -140,6 +153,7 @@ void GraphWidget::graphDraw()
     //that checks all nodes are in data and at scene
     QMap<Node*, bool> inspect;
 
+/*
     //edge deleting
     QStack<Edge*> odd;
 
@@ -158,8 +172,7 @@ void GraphWidget::graphDraw()
                 delete j;
             }
         }
-    }
-
+    }*/
 
 
 
@@ -192,6 +205,7 @@ void GraphWidget::graphDraw()
                 sc->addItem(uNode);
             }
             continue;
+
         }
 
         // if there are two nodes
@@ -224,6 +238,7 @@ void GraphWidget::graphDraw()
 
         if(!uNode->is_adjacent_with(vNode)){
             //edge do not exist
+
             sc->addItem(new Edge(this, uNode, vNode, isDirected, weight.toInt()));
         }else{
             //edge exist
@@ -241,11 +256,40 @@ void GraphWidget::graphDraw()
         if(i.value()==false)
             delete i.key();
 
+    //edge deleting
+    QVector<Node*> odd;
+    QVector<Edge *> edge_to_del;
+    bool need_to_del;
+
+    for(Node *i:graph){
+        for(Edge *j:i->get_edges()){
+
+            if (i == nullptr || j == nullptr || j->get_destination_node() == nullptr || j->get_source_node() == nullptr) continue;
+
+//            if(!edges.contains(j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name())){
+//                qDebug() << j->get_source_node()->get_name()+" ! "+j->get_destination_node()->get_name();
+//            }
+
+            need_to_del = 1;
+
+            for (QString str : edges) {
+                if ( str.indexOf( j->get_source_node()->get_name()+" "+j->get_destination_node()->get_name() ) == 0 ) {
+                    need_to_del = 0;
+                }
+            }
+
+            if (need_to_del) delete j;
+
+        }
+    }
 
 }
 
 void GraphWidget::mousePressEvent(QMouseEvent *event)
 {
+
+    qDebug() << algos_thread.isRunning();
+
     //update();
 
     //catch item clicked
@@ -395,41 +439,14 @@ int GraphWidget::mex(){
 void GraphWidget::adjust_cnt_of_nodes()
 {
     cnt_of_nodes = get_graph().size();
-
-    //qDebug() << cnt_of_nodes;
 }
-
-void GraphWidget::paint_nodes_in_algorithm(Node *cur_node)
-{
-    //first paint nodes
-    for (Node * node : graph) {
-
-        if (node == cur_node) continue;
-        if (used[ node->get_name() ] == 1) node->set_color( QColor("yellow") );
-        if (used[ node->get_name() ] == 2) node->set_color( QColor("red") );
-    }
-}
-
 
 void GraphWidget::start_dfs(QString name)
 {
-    if (timer != nullptr && timer->isActive()) return;
-
-    if (timers.length() <= GraphWidget::DFS) {
-        timers.resize( GraphWidget::DFS + 1 );
-    }
-    if (timers[ GraphWidget::DFS ] == NULL) {
-        timers[ GraphWidget::DFS ] = new QTimer;
-        connect(timers[ GraphWidget::DFS ], SIGNAL( timeout() ), this, SLOT( dfs_iteration() ));
-    }
-
-    timer = timers[ GraphWidget::DFS ];
+    if ( algos_thread.isRunning() ) return;
 
     nodesColorChange();
 
-    for (Node * node : graph) {
-        used[ node->get_name() ] = 0;
-    }
 
     Node * start;
     for (int i = 0; i < cnt_of_nodes; i++) {
@@ -440,91 +457,22 @@ void GraphWidget::start_dfs(QString name)
 
     if (start == NULL) return;
 
-    nodesColorChange();
 
-    timer->setInterval( algos_time_ms );
+    alg->setup_dfs(start);
+    connect( &algos_thread, SIGNAL( started() ), alg, SLOT( start_dfs_alg() ) );
 
-    dfs_stack.clear();
 
-    dfs_stack.push_back({ start, start->get_edges().begin() });
-
-    timer->start();
+    algos_thread.start();
 
 }
 
-void GraphWidget::dfs_iteration()
-{
-
-    if (dfs_stack.isEmpty()) {
-        timer->stop();
-        return;
-    }
-
-    QPair< Node *, QSet< Edge * >::iterator > v = dfs_stack.back();
-    dfs_stack.pop_back();
-
-    v.first->set_color( QColor("green") );
-
-    used[ v.first->get_name() ] = 1;
-
-    Edge * cur_edge;
-
-    QSet<Edge *>::iterator it;
-
-    //first paint nodes
-    paint_nodes_in_algorithm( v.first );
-
-    //then go to other nodes
-
-    for (it = v.second; it != v.first->get_edges().end(); it++) {
-
-        cur_edge = *( it );
-
-
-
-        if (used[ cur_edge->get_source_node()->get_name() ] == 0) {
-
-            dfs_stack.push_back(v);
-            dfs_stack.push_back({ cur_edge->get_source_node(), cur_edge->get_source_node()->get_edges().begin() });
-
-            return;
-        }
-        else if (used[ cur_edge->get_destination_node()->get_name() ] == 0) {
-
-            dfs_stack.push_back(v);
-            dfs_stack.push_back({ cur_edge->get_destination_node(), cur_edge->get_destination_node()->get_edges().begin() });
-
-            return;
-        }
-
-    }
-
-    used[ v.first->get_name() ] = 2;
-
-
-}
 
 
 void GraphWidget::start_bfs(QString name)
 {
-    if (timer != NULL && timer->isActive()) return;
-
-    if (timers.size() <= GraphWidget::BFS) {
-        timers.resize( GraphWidget::BFS + 1 );
-    }
-    if (timers[ GraphWidget::BFS ] == NULL) {
-        timers[ GraphWidget::BFS ] = new QTimer;
-        connect(timers[ GraphWidget::BFS ], SIGNAL( timeout() ), this, SLOT( bfs_iteration() ));
-    }
-
-    timer = timers[ GraphWidget::BFS ];
+    if ( algos_thread.isRunning() ) return;
 
     nodesColorChange();
-
-
-    for (Node * node : graph) {
-        used[ node->get_name() ] = 0;
-    }
 
     Node * start;
     for (int i = 0; i < cnt_of_nodes; i++) {
@@ -536,57 +484,39 @@ void GraphWidget::start_bfs(QString name)
     if (start == NULL) return;
 
 
+    alg->setup_bfs(start);
+    connect( &algos_thread, SIGNAL( started() ), alg, SLOT( start_bfs_alg() ) );
 
-    bfs_deque.push_back({ start, start->get_edges().begin() });
-    used[ start->get_name() ] = 1;
-
-    timer->setInterval( algos_time_ms );
-    timer->start();
+    algos_thread.start();
 }
 
-void GraphWidget::bfs_iteration() {
-
-    if (bfs_deque.isEmpty()) {
-        timer->stop();
-        return;
-    }
-
-    QPair< Node *, QSet< Edge * >::iterator > &v = bfs_deque.front();
-
-    v.first->set_color( QColor("green") );
-
-    Edge * cur_edge;
-
-    QSet<Edge *>::iterator it;
-
-    //first paint nodes
-    paint_nodes_in_algorithm(v.first);
-
-    //then go on
-
-    for (it = v.second; it != v.first->get_edges().end(); it++) {
-        cur_edge = *( it );
-
-        if ( used[ cur_edge->get_source_node()->get_name() ] == 0 ) {
-
-            v.second++;
-            bfs_deque.push_back({ cur_edge->get_source_node(), cur_edge->get_source_node()->get_edges().begin() });
-            used[ cur_edge->get_source_node()->get_name() ] = 1;
-
-            return;
-        }
-        if ( used[ cur_edge->get_destination_node()->get_name() ] == 0 ) {
-
-            v.second++;
-            bfs_deque.push_back({ cur_edge->get_destination_node(), cur_edge->get_destination_node()->get_edges().begin() });
-            used[ cur_edge->get_destination_node()->get_name() ] = 1;
-
-            return;
-        }
-
-    }
-
-    bfs_deque.pop_front();
-    used[ v.first->get_name() ] = 2;
-
+void GraphWidget::disconnect_thread()
+{
+    algos_thread.quit();
+    algos_thread.disconnect();
 }
+
+
+
+void GraphWidget::start_dijkstra(QString name)
+{
+    if ( algos_thread.isRunning() ) return;
+
+    nodesColorChange();
+
+    Node * start;
+    for (int i = 0; i < cnt_of_nodes; i++) {
+        if (graph[i]->get_name() == name) {
+            start = graph[i];
+        }
+    }
+
+    if (start == NULL) return;
+
+
+    alg->setup_dijkstra(start);
+    connect( &algos_thread, SIGNAL( started() ), alg, SLOT( start_dijkstra_alg() ) );
+
+    algos_thread.start();
+}
+
