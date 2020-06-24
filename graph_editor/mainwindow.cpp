@@ -4,6 +4,8 @@
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
+#include <QTableView>
+
 
 QWidget *loadUi(const QString url) // Return object QWidget
 {
@@ -20,6 +22,7 @@ QWidget *loadUi(const QString url) // Return object QWidget
 
 MainWindow::MainWindow()
 {
+
     //items:generate a widget with a .ui file
     QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //"../graph_editor/tabwidget.ui"
@@ -48,7 +51,7 @@ MainWindow::MainWindow()
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
         mainLayout->addWidget(gwidget);
-
+    mainLayout->setContentsMargins(10,0,35,0);
     mainContainer->setLayout(mainLayout);
 
     this->setCentralWidget(mainContainer);
@@ -420,7 +423,4 @@ void MainWindow::start_graph_data_changes_timer()
 
     graph_data_changes_timer->start();
 }
-
-
-
 

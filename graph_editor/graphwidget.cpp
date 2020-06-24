@@ -166,6 +166,11 @@ void GraphWidget::graphDraw()
     //that checks all nodes are in data and at scene
     QMap<Node*, bool> inspect;
 
+    for(Node *i:graph)
+        inspect[i] = false;
+
+
+
 
 /*
     //edge deleting
@@ -266,9 +271,12 @@ void GraphWidget::graphDraw()
 
     //inspector delete odd nodes
     QMap<Node*, bool>::iterator i;
+
     for (i = inspect.begin(); i != inspect.end(); ++i)
-        if(i.value()==false)
+        if(i.value()==false){
             delete i.key();
+
+        }
 
     //edge deleting
     QVector<Node*> odd;
