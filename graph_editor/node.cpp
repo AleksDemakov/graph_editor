@@ -65,7 +65,7 @@ Node::~Node() {
     graph->get_graph().removeOne(this);
     graph->adjust_cnt_of_nodes();
 
-    QSet<Edge *> copy_edges = get_edges();
+    QVector<Edge *> copy_edges = get_edges();
 
     for (Edge * edge : copy_edges) {
         delete edge;
@@ -77,7 +77,6 @@ Node::~Node() {
     if(scene() != NULL)
         scene()->removeItem(this);
 }
-
 
 QRectF Node::boundingRect() const
 {
@@ -150,7 +149,7 @@ QVariant Node::itemChange(GraphicsItemChange change, const QVariant &value) {
 }
 
 void Node::add_edge(Edge * edge) {
-    Node::edges.insert(edge);
+    Node::edges.push_back(edge);
 }
 
 bool Node::is_adjacent_with(Node * node) {
@@ -235,8 +234,9 @@ void Node::calculateForces() {
     //qDebug() << scene()->sceneRect()<<endl<<graph->size();
     QRectF sceneRect = scene()->sceneRect();
     new_calculated_pos = pos() + QPointF(xvel, yvel);
-    new_calculated_pos.setX(qMin(qMax(new_calculated_pos.x(), sceneRect.left() + 10), sceneRect.right() - 10));
-    new_calculated_pos.setY(qMin(qMax(new_calculated_pos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10));
+
+    new_calculated_pos.setX(qMin(qMax(new_calculated_pos.x(), sceneRect.left() / 0.8 ), sceneRect.right() / 0.8 ));
+    new_calculated_pos.setY(qMin(qMax(new_calculated_pos.y(), sceneRect.top() / 0.8 ), sceneRect.bottom() / 0.8 ));
 
     /*new_calculated_pos = pos() + QPointF(xvel, yvel);
     new_calculated_pos.setX( qMax( new_calculated_pos.x(), -300.0 ) );
@@ -244,11 +244,11 @@ void Node::calculateForces() {
     new_calculated_pos.setY( qMax( new_calculated_pos.y(), -300.0 ) );
     new_calculated_pos.setY( qMin( new_calculated_pos.y(), 300.0 ) );*/
 }
-QSet<Edge *> & Node::get_edges()
+QVector<Edge *> & Node::get_edges()
 {
     return edges;
 }
-QString Node::get_name()
+const QString & Node::get_name()
 {
     return name;
 }

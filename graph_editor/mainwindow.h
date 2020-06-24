@@ -29,18 +29,22 @@ class MainWindow : public QMainWindow
         MainWindow();
         QString toDot(QString file);
 
+
+
     public slots:
         void graphWrite();
         //void addEdgeToGraphData(Edge * edge);
-
         void start_dfs();
         void start_bfs();
         void start_dijkstra();
+        void start_kruskal();
+        void start_eulerian();
 
     private slots:
         void start_graph_data_changes_timer();
 
 private:
+
     void createActions();
     void createMenus();
     void save();
@@ -50,6 +54,8 @@ private:
     void about();
 
     void saveFile();
+
+
 
     QString openDot(QString file);
 

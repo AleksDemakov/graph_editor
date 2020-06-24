@@ -21,6 +21,7 @@ public:
 
     void adjust();
     void adjust(QPointF pos);
+    void switchDirection();
 
     enum { Type = UserType + 2 };
     int type() const override { return Type; }
