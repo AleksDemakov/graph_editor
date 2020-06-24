@@ -83,6 +83,8 @@ MainWindow::MainWindow()
     connect(gwidget, SIGNAL(dirChangedReverse(bool)), findChild<QRadioButton*>("buttonUndirected"), SLOT(setChecked(bool)));
 
     connect(findChild<QPushButton *>("dijkstra_button"), SIGNAL(clicked()), this, SLOT( start_dijkstra() ) );
+    connect(findChild<QPushButton *>("kruskal_button"), SIGNAL(clicked()), this, SLOT( start_kruskal() ) );
+    connect(findChild<QPushButton *>("eulerian_button"), SIGNAL(clicked()), this, SLOT( start_eulerian() ) );
 
 
     emit gwidget->graphChanged();
@@ -394,6 +396,19 @@ void MainWindow::start_bfs()
     gwidget->start_bfs( start_vertex->text() );
 
 }
+void MainWindow::start_dijkstra()
+{
+    QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
+    gwidget->start_dijkstra( start_vertex->text() );
+}
+void MainWindow::start_kruskal()
+{
+    gwidget->start_kruskal();
+}
+void MainWindow::start_eulerian()
+{
+    gwidget->start_eulerian();
+}
 
 void MainWindow::start_graph_data_changes_timer()
 {
@@ -406,8 +421,6 @@ void MainWindow::start_graph_data_changes_timer()
     graph_data_changes_timer->start();
 }
 
-void MainWindow::start_dijkstra()
-{
-    QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
-    gwidget->start_dijkstra( start_vertex->text() );
-}
+
+
+

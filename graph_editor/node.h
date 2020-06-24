@@ -30,8 +30,8 @@ public:
     void calculateForces();
     bool advancePosition();
 
-    QSet<Edge *> & get_edges();
-    QString get_name();
+    QVector<Edge *> & get_edges();
+    const QString & get_name();
     Edge *get_edge(Node *to);
     void set_name(QString new_name);
 
@@ -44,7 +44,7 @@ private:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
     QPainterPath shape() const override;
     GraphWidget *graph;
-    QSet<Edge *> edges;
+    QVector<Edge *> edges;
 
     QPointF new_calculated_pos;
     QColor color;
