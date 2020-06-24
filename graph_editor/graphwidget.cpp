@@ -29,16 +29,25 @@ GraphWidget::GraphWidget(QWidget *parent)
     scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
 
-    drawing_an_edge = false;
     drawing_edge = NULL;
 
     font = QFont("serif");
     font.setPointSize(9);
 
+
+
     //create thread and object for algos
     alg = new Algorithms(this);
     alg->moveToThread( &algos_thread );
     connect( alg, SIGNAL( finished() ), this, SLOT( disconnect_thread() ) );
+
+    qRegisterMetaType< QMap<Node *, int> >("QMap<Node *, int>");
+    connect( alg, SIGNAL( finishedDijkstra( QMap< Node *, int >  ) ), this, SLOT( processDijkstraResults( QMap< Node *, int >  ) ) );
+
+    qRegisterMetaType< QVector<Node *> >("QVector<Node *>");
+    connect( alg, SIGNAL( finishedEulerian( QVector< Node * >  ) ), this, SLOT( processEulerianResults( QVector< Node * > ) ) );
+
+    added_edge_to_make_Eulerian_cycle = nullptr;
 
     int cnt = QRandomGenerator::global()->bounded(2, 10);
 
@@ -137,9 +146,13 @@ void GraphWidget::nodesColorChange()
 void GraphWidget::edgesColorChange(QString text)
 {
     edgeColor = QColor(text);
+    edgesColorChange();
+}
+void GraphWidget::edgesColorChange()
+{
     for(Node* i:get_graph()){
         for(Edge* j:i->get_edges())
-            j->set_color(QColor(text));
+            j->set_color(edgeColor);
     }
 }
 
@@ -152,8 +165,13 @@ void GraphWidget::graphDraw()
     //this is an inspector,
     //that checks all nodes are in data and at scene
     QMap<Node*, bool> inspect;
+
     for(Node *i:graph)
         inspect[i] = false;
+
+
+
+
 /*
     //edge deleting
     QStack<Edge*> odd;
@@ -447,19 +465,27 @@ void GraphWidget::adjust_cnt_of_nodes()
 
 void GraphWidget::start_dfs(QString name)
 {
-    if ( algos_thread.isRunning() ) return;
+    if ( algos_thread.isRunning() ) {
+
+        QMessageBox * msg = new QMessageBox();
+        msg->setText("Algorithm is still running");
+        msg->setIcon(QMessageBox::Information);
+        msg->show();
+
+        return;
+    }
 
     nodesColorChange();
+    edgesColorChange();
 
-
-    Node * start;
+    Node * start = nullptr;
     for (int i = 0; i < cnt_of_nodes; i++) {
         if (graph[i]->get_name() == name) {
             start = graph[i];
         }
     }
 
-    if (start == NULL) return;
+    if (start == nullptr) return;
 
 
     alg->setup_dfs(start);
@@ -474,18 +500,27 @@ void GraphWidget::start_dfs(QString name)
 
 void GraphWidget::start_bfs(QString name)
 {
-    if ( algos_thread.isRunning() ) return;
+    if ( algos_thread.isRunning() ) {
+
+        QMessageBox * msg = new QMessageBox();
+        msg->setText("Algorithm is still running");
+        msg->setIcon(QMessageBox::Information);
+        msg->show();
+
+        return;
+    }
 
     nodesColorChange();
+    edgesColorChange();
 
-    Node * start;
+    Node * start = nullptr;
     for (int i = 0; i < cnt_of_nodes; i++) {
         if (graph[i]->get_name() == name) {
             start = graph[i];
         }
     }
 
-    if (start == NULL) return;
+    if (start == nullptr) return;
 
 
     alg->setup_bfs(start);
@@ -499,23 +534,104 @@ void GraphWidget::disconnect_thread()
     algos_thread.quit();
     algos_thread.disconnect();
 }
+void GraphWidget::processDijkstraResults( QMap< Node *, int > dijkstraDistance )
+{
+    disconnect_thread();
 
+    QTableWidget * table = new QTableWidget( 1 , dijkstraDistance.size() );
+    table->setFocusPolicy(Qt::NoFocus);
+    table->setSelectionMode(QTableWidget::NoSelection);
+
+    QMap< Node *, int >::iterator it;
+    QVector< QPair< std::string, int > > v;
+
+
+    for (it = dijkstraDistance.begin(); it != dijkstraDistance.end(); it++) {
+        v.push_back({ it.key()->get_name().toStdString() , it.value() });
+    }
+
+    std::sort( v.begin(), v.end() );
+
+    for (int i = 0; i < v.size(); i++) {
+        qDebug() << QString::fromStdString( v[i].first ) << " " << v[i].second;
+    }
+
+    for ( int i = 0; i < v.size(); i++ ) {
+        table->setHorizontalHeaderItem( i, new QTableWidgetItem( QString::fromStdString( v[i].first ) ) );
+
+        if ( v[i].second == INT_MAX ) {
+            table->setItem( 0, i,  new QTableWidgetItem("∞") );
+        }
+        else  {
+            table->setItem( 0, i, new QTableWidgetItem( QString::number( v[i].second ) ) );
+        }
+
+        table->item(0, i)->setTextAlignment( Qt::AlignCenter );
+    }
+
+    table->resizeColumnsToContents();
+    table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    table->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    int w = 0, h = 0;
+
+    w += table->contentsMargins().left()
+            + table->contentsMargins().right();
+    h += table->contentsMargins().top()
+            + table->contentsMargins().bottom();
+
+
+    w += table->verticalHeader()->width();
+    h += table->horizontalHeader()->height();
+
+
+    for (int i = 0; i < table->columnCount(); ++i)
+        w += table->columnWidth(i);
+    w += table->columnWidth(0);
+    for (int i = 0; i < table->rowCount(); ++i)
+        h += table->rowHeight(i);
+
+    table->setFixedSize(w, h);
+
+
+    table->setVerticalHeaderItem(0, new QTableWidgetItem("Distance") );
+
+    table->setWindowTitle("Dijkstra results");
+
+    QMainWindow * wind = new QMainWindow();
+
+    wind->setCentralWidget( table );
+    wind->setContentsMargins(10, 10, 10, 10);
+    wind->setFixedSize( table->width() + 20, table->height() + 20 );
+    wind->setWindowTitle("Dijkstra results");
+    wind->show();
+
+}
 
 
 void GraphWidget::start_dijkstra(QString name)
 {
-    if ( algos_thread.isRunning() ) return;
+    if ( algos_thread.isRunning() ) {
+
+        QMessageBox * msg = new QMessageBox();
+        msg->setText("Algorithm is still running");
+        msg->setIcon(QMessageBox::Information);
+        msg->show();
+
+        return;
+    }
 
     nodesColorChange();
+    edgesColorChange();
 
-    Node * start;
+    Node * start = nullptr;
     for (int i = 0; i < cnt_of_nodes; i++) {
         if (graph[i]->get_name() == name) {
             start = graph[i];
         }
     }
 
-    if (start == NULL) return;
+    if (start == nullptr) return;
 
 
     alg->setup_dijkstra(start);
@@ -524,3 +640,191 @@ void GraphWidget::start_dijkstra(QString name)
     algos_thread.start();
 }
 
+
+QSet< Edge * > GraphWidget::getAllEdges() {
+    QSet< Edge * > edges;
+
+    for (Node * node : graph) {
+        for (Edge * edge : node->get_edges()) {
+            edges.insert( edge );
+        }
+    }
+    return edges;
+}
+
+void GraphWidget::start_kruskal()
+{
+    if ( algos_thread.isRunning() ) {
+
+        QMessageBox * msg = new QMessageBox();
+        msg->setText("Algorithm is still running");
+        msg->setIcon(QMessageBox::Information);
+        msg->show();
+
+        return;
+    }
+
+    nodesColorChange();
+    edgesColorChange();
+
+    alg->setup_kruskal();
+    connect( &algos_thread, SIGNAL( started() ), alg, SLOT( start_kruskal_alg() ) );
+
+    algos_thread.start();
+}
+
+bool GraphWidget::isEulerian()
+{
+    int from = 0, to = 0;
+    for (Node * node : graph) {
+
+        if ( !isDirected && (node->get_edges().size() % 2 == 1 ) ) return false;
+
+        if ( isDirected ) {
+            for (Edge * edge : node->get_edges()) {
+                if (edge->get_source_node() == node) from++;
+                else to++;
+            }
+            if (from != to) return false;
+        }
+    }
+    return true;
+}
+
+bool GraphWidget::isSemiEulerian(Node *&start_node, Node *&finish_node)
+{
+    start_node = nullptr;
+    finish_node = nullptr;
+    int from = 0, to = 0;
+
+    for (Node * node : graph) {
+
+        from = to = 0;
+
+        if ( !isDirected && (node->get_edges().size() % 2 == 1 ) ) {
+
+            if (start_node == nullptr) start_node = node;
+            else if (finish_node == nullptr) finish_node = node;
+            else return false;
+
+        }
+
+        if ( isDirected ) {
+            for (Edge * edge : node->get_edges()) {
+                if (edge->get_source_node() == node) from++;
+                else to++;
+            }
+            if (to - from == 0) {
+                continue;
+            }
+
+            if (to - from == 1) {
+
+                if (start_node == nullptr) start_node = node;
+                else return false;
+
+            }
+            else if (from - to == 1) {
+
+                if (finish_node == nullptr) finish_node = node;
+                else return false;
+
+            }
+            else return false;
+        }
+    }
+
+    return true;
+
+}
+
+void GraphWidget::start_eulerian()
+{
+    if ( algos_thread.isRunning() ) {
+
+        QMessageBox * msg = new QMessageBox();
+        msg->setText("Algorithm is still running");
+        msg->setIcon(QMessageBox::Information);
+        msg->show();
+
+        return;
+    }
+
+    Node * start = nullptr;
+    Node * finish = nullptr;
+
+    if (!isEulerian()) {
+
+
+        if (!isSemiEulerian(start, finish)) {
+            //qDebug() << "!";
+            QMessageBox * msg = new QMessageBox();
+            msg->setText("Graph is not Eulerian");
+            msg->setIcon(QMessageBox::Critical);
+            msg->show();
+
+            return;
+
+        }
+
+    }
+
+
+    if (start == nullptr) start = graph[0];
+
+    if (finish != nullptr) {
+        added_edge_to_make_Eulerian_cycle = new Edge(this, start, finish, false);
+        qDebug() << start->get_name() << " " << finish->get_name();
+    }
+
+    nodesColorChange();
+    edgesColorChange();
+
+    alg->setup_eulerian(start);
+    connect( &algos_thread, SIGNAL( started() ), alg, SLOT( start_eulerian_alg() ) );
+
+    algos_thread.start();
+
+
+}
+
+void GraphWidget::processEulerianResults(QVector<Node *> eulerian_path)
+{
+    disconnect_thread();
+    for (Node * node : eulerian_path) {
+        qDebug() << node->get_name();
+    }
+
+    int n = eulerian_path.size();
+
+
+    Edge * edge = nullptr;
+
+    for (int i = 0; i < n - 1; i++ ) {
+        edge = eulerian_path[i]->get_edge( eulerian_path[ i + 1 ] );
+
+        if (edge == added_edge_to_make_Eulerian_cycle) continue;
+
+        if (edge->get_source_node() != eulerian_path[i]) {
+            qDebug() << edge->get_source_node()->get_name() << " ! " << edge->get_destination_node()->get_name();
+
+            edge->switchDirection();
+
+            qDebug() << edge->get_source_node()->get_name() << " ! " << edge->get_destination_node()->get_name() << "\n";
+        }
+
+    }
+
+    if (added_edge_to_make_Eulerian_cycle != nullptr) {
+
+        added_edge_to_make_Eulerian_cycle->get_source_node()->set_color( QColor("#b072a9") );
+        added_edge_to_make_Eulerian_cycle->get_destination_node()->set_color( QColor("red") );
+
+        delete added_edge_to_make_Eulerian_cycle;
+        added_edge_to_make_Eulerian_cycle = nullptr;
+
+
+    }
+
+    setDirected(true);
+}

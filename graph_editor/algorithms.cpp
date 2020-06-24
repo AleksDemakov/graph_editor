@@ -2,9 +2,12 @@
 #include "graphwidget.h"
 #include "node.h"
 #include "edge.h"
+#include "mainwindow.h"
 
 #include <QThread>
 #include <QDebug>
+#include <QWindow>
+#include <QTableWidget>
 
 Algorithms::Algorithms(GraphWidget * graph)
 {
@@ -138,6 +141,9 @@ void Algorithms::bfs()
 
 void Algorithms::setup_dijkstra(Node * node) {
 
+    used.clear();
+    dijkstra_distance.clear();
+
     for (Node * node : graph->get_graph()) {
         used[ node ] = 0;
         dijkstra_distance[ node ] = INT_MAX;
@@ -151,7 +157,7 @@ void Algorithms::start_dijkstra_alg()
 {
     dijkstra();
 
-    emit finished();
+    emit finishedDijkstra( getDijkstraDistance() );
 }
 
 void Algorithms::dijkstra()
@@ -191,8 +197,128 @@ void Algorithms::dijkstra()
 
     }
 
-
     QMap< Node * , int>::iterator i;
-     for (i = dijkstra_distance.begin(); i != dijkstra_distance.end(); ++i)
+    for (i = dijkstra_distance.begin(); i != dijkstra_distance.end(); ++i)
          qDebug() << i.key()->get_name() << ": " << i.value() << endl;
+}
+
+QMap< Node *, int > Algorithms::getDijkstraDistance()
+{
+    return dijkstra_distance;
+}
+
+
+
+
+Node * Algorithms::dsu_get(Node *node)
+{
+    if (parents[node] == node) return node;
+    return parents[node] = dsu_get( parents[node] );
+}
+
+void Algorithms::dsu_unite(Node *node1, Node *node2)
+{
+    node1 = dsu_get(node1);
+    node2 = dsu_get(node2);
+
+    if (node1 != node2) {
+        parents[node1] = node2;
+    }
+}
+
+void Algorithms::kruskal()
+{
+    QVector< std::pair<int, Edge *> >::iterator it;
+    Node * a;
+    Node * b;
+
+    for (it = graph_edges_kruskal.begin(); it != graph_edges_kruskal.end(); it++) {
+
+        a = it->second->get_source_node();
+        b = it->second->get_destination_node();
+
+        if (dsu_get(a) != dsu_get(b)) {
+            dsu_unite(a, b);
+
+            it->second->set_color( QColor("red") );
+        }
+
+    }
+}
+
+void Algorithms::setup_kruskal()
+{
+    parents.clear();
+    graph_edges_kruskal.clear();
+
+    for (Node * node : graph->get_graph()) {
+        parents[ node ] = node;
+    }
+
+    for (Edge * edge : graph->getAllEdges()) {
+        graph_edges_kruskal.push_back({ edge->get_weight(), edge });
+    }
+    std::sort( graph_edges_kruskal.begin(), graph_edges_kruskal.end() );
+
+    //qDebug() << graph_edges_kruskal;
+
+}
+
+void Algorithms::start_kruskal_alg()
+{
+    kruskal();
+    emit finished();
+}
+
+
+
+
+void Algorithms::setup_eulerian(Node *node)
+{
+    used_edges.clear();
+    eulerian_path.clear();
+
+    for (Edge * edge : graph->getAllEdges()) {
+        used_edges[ edge ] = false;
+    }
+
+    start_vertex = node;
+}
+
+void Algorithms::start_eulerian_alg()
+{
+
+    findEulerianPath(start_vertex);
+    std::reverse( eulerian_path.begin(), eulerian_path.end() );
+    emit finishedEulerian( eulerian_path );
+
+}
+
+void Algorithms::findEulerianPath(Node *node)
+{
+
+    for (Edge * edge : node->get_edges()) {
+        if (used_edges[ edge ] == true) continue;
+
+        if ( edge->get_destination_node() != node ) {
+
+            used_edges[ edge ] = true;
+
+            findEulerianPath( edge->get_destination_node() );
+
+        }
+
+        if (graph->isDirected) continue;
+
+        if ( edge->get_source_node() != node ) {
+
+            used_edges[ edge ] = true;
+
+            findEulerianPath( edge->get_source_node() );
+
+        }
+    }
+
+    eulerian_path.push_back(node);
+
 }

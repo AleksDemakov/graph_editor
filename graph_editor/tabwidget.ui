@@ -276,7 +276,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>bfs</string>
+       <string>BFS</string>
       </property>
       <property name="default">
        <bool>false</bool>
@@ -292,7 +292,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>dfs</string>
+       <string>DFS</string>
       </property>
       <property name="default">
        <bool>false</bool>
@@ -347,12 +347,44 @@
        </rect>
       </property>
       <property name="text">
-       <string>dijkstra</string>
+       <string>Dijkstra</string>
       </property>
       <property name="default">
        <bool>false</bool>
       </property>
      </widget>
+    </widget>
+    <widget class="QPushButton" name="kruskal_button">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>210</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Kruskal</string>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="eulerian_button">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>260</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Eulerian Cycle</string>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
     </widget>
    </widget>
   </widget>

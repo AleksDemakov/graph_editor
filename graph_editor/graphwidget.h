@@ -25,6 +25,7 @@ public:
     GraphWidget(QWidget *parent = nullptr);
     //void nodesColorChange(QString text);
     void item_is_changed();
+    Edge * added_edge_to_make_Eulerian_cycle;
     QVector<Node *> &get_graph();
     QGraphicsScene *sc;
     bool isDirected = false;
@@ -35,10 +36,13 @@ public:
     int cnt_of_nodes = 0;
     QFont font;
     int mex();
+    QSet< Edge * > getAllEdges();
 
     void start_dfs(QString name);
     void start_bfs(QString name);
     void start_dijkstra(QString name);
+    void start_kruskal();
+    void start_eulerian();
 
     void adjust_cnt_of_nodes();
 
@@ -58,7 +62,7 @@ public slots:
     void setWeighted();
     void setWeighted(bool isdir);
 
-    void disconnect_thread();
+
 
 
 
@@ -67,12 +71,20 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
     void nodesColorChange();
+    void edgesColorChange();
+    bool isEulerian();
+    bool isSemiEulerian(Node * &start_node, Node * &finish_node);
 
+private slots:
+    void disconnect_thread();
+    void processDijkstraResults( QMap< Node *, int > dijkstraDistance );
+    void processEulerianResults( QVector< Node * > eulerain_path );
 
 private:
 
-    bool drawing_an_edge;
+    //bool drawing_an_edge;
     Edge * drawing_edge;
+
     QVector<Node *> graph;
 
     int timerId = 0;
@@ -80,6 +92,7 @@ private:
     void paint_nodes_in_algorithm( Node * cur_node );
     QThread algos_thread;
     Algorithms * alg;
+
 
 
 };

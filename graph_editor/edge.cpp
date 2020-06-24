@@ -70,15 +70,17 @@ Edge::Edge(GraphWidget *graphWidget,Node * source, QPointF destPoint, bool isDir
 Edge::~Edge() {
     if (source != nullptr) {
         //if (source->get_edges().find( this ) != source->get_edges().end())
-        source->get_edges().remove( this );
+        source->get_edges().remove( source->get_edges().indexOf( this ) );
     }
     if (destination != nullptr) {
         //if (destination->get_edges().find( this ) != destination->get_edges().end())
-        destination->get_edges().remove( this );
+        destination->get_edges().remove( destination->get_edges().indexOf( this ) );
     }
     if(scene() != nullptr){
         scene()->removeItem(this);
     }
+
+    qDebug() << "OGO";
 
     if (weight_label->scene() != nullptr) graph->scene()->removeItem( weight_label );
    
@@ -272,4 +274,10 @@ void Edge::hide_weight_label()
 bool Edge::weight_label_is_on_scene()
 {
     return  (weight_label->scene() != nullptr);
+}
+
+void Edge::switchDirection()
+{
+    qSwap( source, destination );
+    adjust();
 }
