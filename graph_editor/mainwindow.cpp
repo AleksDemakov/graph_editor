@@ -4,6 +4,8 @@
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
+#include <QTableView>
+
 
 QWidget *loadUi(const QString url) // Return object QWidget
 {
@@ -20,6 +22,7 @@ QWidget *loadUi(const QString url) // Return object QWidget
 
 MainWindow::MainWindow()
 {
+
     //items:generate a widget with a .ui file
     QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //"../graph_editor/tabwidget.ui"
@@ -48,7 +51,7 @@ MainWindow::MainWindow()
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
         mainLayout->addWidget(gwidget);
-
+    mainLayout->setContentsMargins(10,0,35,0);
     mainContainer->setLayout(mainLayout);
 
     this->setCentralWidget(mainContainer);
@@ -410,4 +413,6 @@ void MainWindow::start_dijkstra()
 {
     QLineEdit * start_vertex = findChild<QLineEdit *>("start_vertex");
     gwidget->start_dijkstra( start_vertex->text() );
+    QTableWidget *wind = new QTableWidget(2,2);
+    wind->show();
 }
