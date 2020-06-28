@@ -53,7 +53,7 @@ private:
     void saveAsPNG();
     void open();
     void about();
-
+    void algorithmsDes();
     void saveFile();
 
 
@@ -71,7 +71,7 @@ private:
     QAction *saveAsPNGAct;
     QAction *exitAct;
     QAction *aboutAct;
-
+    QAction *algorithmsAct;
     QTextEdit *ui_textEdit;
     GraphWidget *gwidget;
     QString fileName = NULL;

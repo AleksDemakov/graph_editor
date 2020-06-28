@@ -34,7 +34,7 @@ MainWindow::MainWindow()
     gwidget = new GraphWidget(this);
     // !
     //gwidget->setFixedSize(500, 500);
-    //gwidget->setMinimumSize(500, 500);
+    gwidget->setMinimumSize(500, 500);
 
 
     graph_data_changes_timer = new QTimer;
@@ -45,7 +45,8 @@ MainWindow::MainWindow()
     createMenus();
 
     //containers
-    formWidget->setMinimumSize(375, 492);
+    //formWidget->setMinimumSize(375, 492);
+    formWidget->setMinimumSize(400, 520);
 
     QWidget *mainContainer = new QWidget;
     QHBoxLayout *mainLayout = new QHBoxLayout;
@@ -224,6 +225,22 @@ void MainWindow::about()
                "© А. В. Демаков, В. А. Муратов 2020 г."));
 
 }
+void MainWindow::algorithmsDes(){
+    QMessageBox::about(this, tr("About Application"),
+             tr("<li><b>DFS</b> - start search depth-first search at the start node."
+                "( Green node - current node, yellow node - node is in stack, red node - processed and removed from stack node )."
+                " You can control the time of one iteration by Speed slider</li>"
+                "<li><b>BFS</b> - explores all of the neighbor nodes at the present depth prior"
+                "to moving on to the nodes at the next depth level."
+                " ( Green node - current node, yellow node - node is in queue, red node - processed and removed from queue node )."
+                " You can control the time of one iteration by Speed slider</li>"
+                "<li><b>Dijkstra's algorithm</b> - finds lengths of shortest paths from start node to others. "
+                "Shows table with distances.</li>"
+                "<li></b>Kruskal's algorithm</b>- finds a minimum spanning tree. "
+                "Selected edges are painted in red.</li>"
+                "<li><b>Eulerian cycle</b>- finds Eulerian cycle or path or say that graph is not Eulerian or SemiEulerian."
+                " Makes selected edges directed.</li>"));
+}
 void MainWindow::saveAsPNG(){
     const QString title = tr("Save As PNG(%1)");
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -331,7 +348,8 @@ void MainWindow::createActions(){
 
     aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
-
+    algorithmsAct = new QAction(tr("&Algorithms"), this);
+    connect(algorithmsAct, &QAction::triggered, this, &MainWindow::algorithmsDes);
 }
 
 void MainWindow::createMenus()
@@ -347,12 +365,9 @@ void MainWindow::createMenus()
 
     fileMenu->addAction(exitAct);
 
-    /*editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addSeparator();
-    editMenu->addSeparator();*/
-
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
+    helpMenu->addAction(algorithmsAct);
 
 }
 
