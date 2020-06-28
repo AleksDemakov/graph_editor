@@ -29,7 +29,7 @@ public:
     void setIsDirected(bool dir);
     void disable_following_the_cursor();
     int get_weight();
-
+    void setFontSize(int);
 
     void show_weight_label();
     void hide_weight_label();

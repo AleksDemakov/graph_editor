@@ -180,27 +180,20 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
     painter->setPen(QPen(color, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter->drawLine(line);
 
-    if (destination == nullptr) return;
+    if (destination == nullptr || !isDirected) return;
 
+    qreal arrowSize = 15;
+    // Draw the arrows
+    double angle = std::atan2(-line.dy(), line.dx());
 
-    if(isDirected) {
+    QPointF destArrowP1 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI / 3) * arrowSize,
+                                              cos(angle - M_PI / 3) * arrowSize);
+    QPointF destArrowP2 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI + M_PI / 3) * arrowSize,
+                                              cos(angle - M_PI + M_PI / 3) * arrowSize);
+    //to draw arrow in invert direction swap plus on minus(see Elastic node)
+    painter->setBrush(color);
 
-        qreal arrowSize = 15;
-        // Draw the arrows
-        double angle = std::atan2(-line.dy(), line.dx());
-
-        QPointF destArrowP1 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI / 3) * arrowSize,
-                                                  cos(angle - M_PI / 3) * arrowSize);
-        QPointF destArrowP2 = destPoint - adjust_source_and_destination + QPointF(sin(angle - M_PI + M_PI / 3) * arrowSize,
-                                                  cos(angle - M_PI + M_PI / 3) * arrowSize);
-        //to draw arrow in invert direction swap plus on minus(see Elastic node)
-        painter->setBrush(color);
-
-        painter->drawPolygon(QPolygonF() << line.p2() - adjust_source_and_destination << destArrowP1 << destArrowP2);
-
-    }
-
-
+    painter->drawPolygon(QPolygonF() << line.p2() - adjust_source_and_destination << destArrowP1 << destArrowP2);
 }
 
 void Edge::disable_following_the_cursor() {
@@ -260,7 +253,13 @@ void Edge::setIsDirected(bool dir)
     extra = ( penWidth + (dir ? 15 : 0) ) / 2.0;
     update();
 }
-
+void Edge::setFontSize(int size){
+    QFont t = weight_label->font();
+    t.setPointSize(size);
+    weight_label->setFont(t);
+    qDebug()<<weight_label->font();
+    update();
+}
 void Edge::show_weight_label()
 {
     weight_label->show();

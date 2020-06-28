@@ -30,7 +30,7 @@ MainWindow::MainWindow()
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
-
+    //QGraphicsScene *scene = new QGraphicsScene();
     gwidget = new GraphWidget(this);
     // !
     //gwidget->setFixedSize(500, 500);
@@ -51,7 +51,7 @@ MainWindow::MainWindow()
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
         mainLayout->addWidget(gwidget);
-    mainLayout->setContentsMargins(10,0,35,0);
+    mainLayout->setContentsMargins(10, 10, 35, 35);
     mainContainer->setLayout(mainLayout);
 
     this->setCentralWidget(mainContainer);
@@ -84,10 +84,12 @@ MainWindow::MainWindow()
     connect(findChild<QRadioButton*>("buttonUndirected"), SIGNAL(pressed()), gwidget, SLOT(setDirected()));
     connect(gwidget, SIGNAL(dirChanged(bool)), findChild<QRadioButton*>("buttonDirected"), SLOT(setChecked(bool)));
     connect(gwidget, SIGNAL(dirChangedReverse(bool)), findChild<QRadioButton*>("buttonUndirected"), SLOT(setChecked(bool)));
-
+    findChild<QSpinBox *>("fontSize")->setValue(9);
     connect(findChild<QPushButton *>("dijkstra_button"), SIGNAL(clicked()), this, SLOT( start_dijkstra() ) );
     connect(findChild<QPushButton *>("kruskal_button"), SIGNAL(clicked()), this, SLOT( start_kruskal() ) );
     connect(findChild<QPushButton *>("eulerian_button"), SIGNAL(clicked()), this, SLOT( start_eulerian() ) );
+    //connect(findChild<QSpinBox *>("nodeRadius"), SIGNAL(valueChanged(int)), gwidget, SLOT( radiusChange(int) ) );
+    connect(findChild<QSpinBox *>("fontSize"), SIGNAL(valueChanged(int)), gwidget, SLOT( setFontSize(int) ) );
 
 
     connect(findChild<QSlider *>("algos_time_slider"), SIGNAL(valueChanged(int)), this, SLOT( setAlgosTime(int) ) );
@@ -218,7 +220,8 @@ void MainWindow::about()
                "<ul><li><b>Left Click</b> on the right veiw creates a node</li>"
                "<li><b>Right Click</b> on node creates edge from it,"
                " Second right click makes two nodes connected</li>"
-               "<li><b> Shift + Left Click</b> delete items</li></ul>"));
+               "<li><b> Shift + Left Click</b> delete items</li></ul>"
+               "© А. В. Демаков, В. А. Муратов 2020 г."));
 
 }
 void MainWindow::saveAsPNG(){
@@ -303,7 +306,7 @@ void MainWindow::saveFile(){
 
 
 void MainWindow::createActions(){
-    exitAct = new QAction(tr("E&xit"), this);
+    exitAct = new QAction(tr("&Exit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, &QAction::triggered, this, &QWidget::close);
@@ -326,7 +329,7 @@ void MainWindow::createActions(){
     openAct->setStatusTip("Open");
     connect(openAct, &QAction::triggered, this, &MainWindow::open);
 
-    aboutAct = new QAction(tr("&about"), this);
+    aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, &QAction::triggered, this, &MainWindow::about);
 
 }

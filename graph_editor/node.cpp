@@ -19,8 +19,6 @@ Node::Node(GraphWidget *graphWidget, QString name)
 
     color = graphWidget->nodeColor;
 
-
-
     int from, to;
     double x, y;
 
@@ -39,7 +37,7 @@ Node::Node(GraphWidget *graphWidget, QString name)
 
     graph->get_graph().push_back( this );
     graph->adjust_cnt_of_nodes();
-
+    this->set_radius(graph->radius);
 }
 
 Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
@@ -51,9 +49,7 @@ Node::Node(GraphWidget *graphWidget, QPointF pos, QString name)
 Node::Node(GraphWidget *graphWidget, QPointF pos)
     : Node(graphWidget, QString::number(graphWidget->mex()))//
 {
-    //qDebug()<<pos;
     this->setPos( pos );
-
 }
 
 Node::Node(GraphWidget *graphWidget)
@@ -83,7 +79,8 @@ QRectF Node::boundingRect() const
     qreal adjust = 2;
     //return QRectF( -10 - adjust, -10 - adjust, 23 + adjust, 23 + adjust);
     //17 39.1
-    return QRectF( -24 - adjust, -24 - adjust, 48 + 2 * adjust, 48 + 2 * adjust);
+    //return QRectF( -24 - adjust, -24 - adjust, 48 + 2 * adjust, 48 + 2 * adjust);
+    return QRectF( -radius - adjust, -radius - adjust,2* radius + 2 * adjust, 2*radius + 2 * adjust);
 }
 
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
@@ -102,16 +99,10 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         gradient.setColorAt(1, Qt::darkYellow);*/
         node_background = QColor( Qt::white );
     }
-
-
-    //painter->setPen(QPen(Qt::black, 0));
     painter->setBrush( node_background );
     painter->setPen(QPen(color, 1));
-    //painter->drawEllipse(-10, -10, 20, 20);
-    //painter->drawEllipse(-17, -17, 34, 34);
-
-    painter->drawEllipse(-24, -24, 48, 48);
-
+    //painter->drawEllipse(-24, -24, 48, 48);
+    painter->drawEllipse(QPoint(0, 0), radius, radius);
     painter->setFont(graph->font);
 
     painter->setPen( QColor(255 - node_background.red(), 255 - node_background.green(), 255 - node_background.blue()) );
@@ -138,7 +129,6 @@ QVariant Node::itemChange(GraphicsItemChange change, const QVariant &value) {
 
         for (Edge * edge : edges) {
             edge->adjust();
-            //qDebug()<<"!";
         }
 
         graph->item_is_changed();
@@ -261,7 +251,10 @@ void Node::set_color(QColor new_color)
     color = new_color;
     update();
 }
-
+void Node::set_radius(int rad){
+    radius = rad;
+    update();
+}
 QPainterPath Node::shape() const
 {
     QPainterPath path;

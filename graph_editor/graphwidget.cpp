@@ -17,23 +17,25 @@
 GraphWidget::GraphWidget(QWidget *parent)
     : QGraphicsView(parent)
 {
-
+    setMinimumSize(500, 400);
+    //sc = new QGraphicsScene(this);
     sc = new QGraphicsScene(this);
     sc->setItemIndexMethod(QGraphicsScene::NoIndex);
     //sc->setSceneRect(-200, -200, 400, 400);
-    sc->setSceneRect( this->rect() );
+    sc->setSceneRect(this->rect());
     setScene(sc);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
-    //scale(qreal(0.8), qreal(0.8));
-    setMinimumSize(500, 400);
+    scale(qreal(0.8), qreal(0.8));
+    //setMinimumSize(500, 400);
+
 
     drawing_edge = NULL;
-
+    radius = 25;
     font = QFont("serif");
-    font.setPointSize(9);
+    this->setFontSize(9);
 
 
 
@@ -51,26 +53,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     added_edge_to_make_Eulerian_cycle = nullptr;
 
     int cnt = QRandomGenerator::global()->bounded(2, 10);
-
-    //quint32 v = QRandomGenerator::bounded();
-
-//    Node * node_test_edge1 = new Node(this);
-//    node_test_edge1->setPos(-50, -50);
-//    Node * node_test_edge2 = new Node(this);
-//    node_test_edge2->setPos(50, 50);
-//    Node * node_test_edge3 = new Node(this);
-//    node_test_edge2->setPos(0, 100);
-
-//    sc->addItem(node_test_edge1);
-//    sc->addItem(node_test_edge2);
-//    sc->addItem(node_test_edge3);
-
-//    Edge * edge1 = new Edge(node_test_edge1, node_test_edge2);
-//    Edge * edge2 = new Edge(node_test_edge1, node_test_edge3);
-//    sc->addItem(edge1);
-//    sc->addItem(edge2);
-
-
     for (int i = 0; i < cnt; i++) {
         new Node(this);
         sc->addItem(graph[i]);
@@ -93,6 +75,7 @@ GraphWidget::GraphWidget(QWidget *parent)
     }
 
 }
+
 void GraphWidget::setDirected(bool isdir){
     isDirected = isdir;
     for(Node *node:get_graph())
@@ -105,6 +88,7 @@ void GraphWidget::setDirected(bool isdir){
         emit this->dirChangedReverse(true);
     }
 }
+
 void GraphWidget::setDirected(){
     QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
     bool buttonDirValue = false;
@@ -123,13 +107,21 @@ void GraphWidget::setWeighted(bool isW){
 
     emit graphChanged();
 }
-//Weights
 void GraphWidget::setWeighted(){
     QRadioButton *but =  qobject_cast<QRadioButton *>(sender());
     bool buttonDirValue = false;
     if(but->objectName() == "weighted")
         buttonDirValue = true;
     setWeighted(buttonDirValue);
+}
+void GraphWidget::setFontSize(int size)
+{
+    font.setPointSize(size);
+    for(Node *i:graph){
+        i->update();
+        for(Edge *j:i->get_edges())
+            j->setFontSize(size);
+    }
 }
 void GraphWidget::nodesColorChange(QString text)
 {
@@ -207,7 +199,7 @@ void GraphWidget::graphDraw()
         //if(/*!edge.contains(' ') || */*edge.end() == ' ')continue;
         uNode=NULL;
         vNode=NULL;
-        weight=1;
+        weight = "1";
         QList<QString> u = edge.split(' ');
 
         // if it is a single node
@@ -230,7 +222,9 @@ void GraphWidget::graphDraw()
 
         // if there are two nodes
         if(u.size()==3){
-            weight = u[2];
+            if(u[2] != "")
+                weight = u[2];
+
         }
 
         for(Node *i:graph){
@@ -258,7 +252,6 @@ void GraphWidget::graphDraw()
 
         if(!uNode->is_adjacent_with(vNode)){
             //edge do not exist
-
             sc->addItem(new Edge(this, uNode, vNode, isDirected, weight.toInt()));
         }else{
             //edge exist
@@ -307,12 +300,18 @@ void GraphWidget::graphDraw()
     }
 
 }
-
+void GraphWidget::radiusChange(int rad)
+{
+    radius = rad;
+    for(Node *i:graph)
+        i->set_radius(rad);
+}
 void GraphWidget::mousePressEvent(QMouseEvent *event)
 {
 
-    qDebug() << algos_thread.isRunning();
-
+    this->scene()->setSceneRect(this->rect());
+    for(Node *i:graph)i->update();
+    qDebug() << this->sceneRect();
     //update();
 
     //catch item clicked

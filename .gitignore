@@ -1,2 +1,12 @@
 debug/
 build-graph_editor-Desktop_Qt_5_14_1_MinGW_64_bit-Release/
+build-graph_editor-Desktop_Qt_5_15_0_MinGW_64_bit-Debug/
+build-graph_editor-Desktop_Qt_5_15_0_MinGW_64_bit-Release/
+graph_editor/Makefile*
+graph_editor/*user*
+graph_editor/*.pro*
+graph_editor/graph_editor.pro
+graph_editor/graph_editor.pro.user
+graph_editor/graph_editor_resource.rc
+graph_editor/ui_*
+graph_editor/*.stash
