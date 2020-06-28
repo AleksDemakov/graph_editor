@@ -433,3 +433,4 @@ void MainWindow::setAlgosTime(int time)
     label->setText( QString::number(time) + " ms" );
     gwidget->setAlgosTime(time);
 }
+
