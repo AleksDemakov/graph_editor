@@ -29,6 +29,7 @@ GraphWidget::GraphWidget(QWidget *parent)
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
     scale(qreal(0.8), qreal(0.8));
+    //setMinimumSize(500, 400);
 
 
     drawing_edge = NULL;
@@ -826,4 +827,9 @@ void GraphWidget::processEulerianResults(QVector<Node *> eulerian_path)
     }
 
     setDirected(true);
+}
+
+void GraphWidget::setAlgosTime(int time)
+{
+    alg->setAlgosTime(time);
 }

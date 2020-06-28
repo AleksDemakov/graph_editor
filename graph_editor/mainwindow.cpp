@@ -92,6 +92,9 @@ MainWindow::MainWindow()
     connect(findChild<QSpinBox *>("fontSize"), SIGNAL(valueChanged(int)), gwidget, SLOT( setFontSize(int) ) );
 
 
+    connect(findChild<QSlider *>("algos_time_slider"), SIGNAL(valueChanged(int)), this, SLOT( setAlgosTime(int) ) );
+
+
     emit gwidget->graphChanged();
 }
 
@@ -425,5 +428,12 @@ void MainWindow::start_graph_data_changes_timer()
     graph_data_changes_timer->setSingleShot(true);
 
     graph_data_changes_timer->start();
+}
+
+void MainWindow::setAlgosTime(int time)
+{
+    QLabel * label = findChild<QLabel *>("cur_algos_time");
+    label->setText( QString::number(time) + " ms" );
+    gwidget->setAlgosTime(time);
 }
 

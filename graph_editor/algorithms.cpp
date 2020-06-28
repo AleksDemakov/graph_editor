@@ -39,7 +39,8 @@ void Algorithms::dfs(Node * v) {
     bool was_operation = 0;
 
     v->set_color( QColor("green") );
-    QThread::msleep( algos_time_ms );
+
+    delay();
 
     for (Edge * edge : v->get_edges()) {
         was_operation = 0;
@@ -61,7 +62,7 @@ void Algorithms::dfs(Node * v) {
         }
 
         v->set_color( QColor("green") );
-        if (was_operation) QThread::msleep( algos_time_ms );
+        if (was_operation) delay();
 
     }
 
@@ -102,7 +103,7 @@ void Algorithms::bfs()
         bfs_queue.pop_front();
 
         v->set_color( QColor("green") );
-        QThread::msleep( algos_time_ms );
+        delay();
 
 
 
@@ -127,7 +128,7 @@ void Algorithms::bfs()
 
             }
 
-            if (was_operation) QThread::msleep( algos_time_ms );
+            if (was_operation) delay();
 
         }
 
@@ -321,4 +322,16 @@ void Algorithms::findEulerianPath(Node *node)
 
     eulerian_path.push_back(node);
 
+}
+
+void Algorithms::setAlgosTime(int time)
+{
+    algos_time_ms = time;
+}
+
+void Algorithms::delay()
+{
+    for (int i = 0; i < algos_time_ms; i++) {
+        QThread::msleep( 1 );
+    }
 }
