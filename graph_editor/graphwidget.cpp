@@ -20,13 +20,14 @@ GraphWidget::GraphWidget(QWidget *parent)
 
     sc = new QGraphicsScene(this);
     sc->setItemIndexMethod(QGraphicsScene::NoIndex);
-    sc->setSceneRect(-200, -200, 400, 400);
+    //sc->setSceneRect(-200, -200, 400, 400);
+    sc->setSceneRect( this->rect() );
     setScene(sc);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
-    scale(qreal(0.8), qreal(0.8));
+    //scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
 
     drawing_edge = NULL;
@@ -166,6 +167,11 @@ void GraphWidget::graphDraw()
     //that checks all nodes are in data and at scene
     QMap<Node*, bool> inspect;
 
+    for(Node *i:graph)
+        inspect[i] = false;
+
+
+
 
 /*
     //edge deleting
@@ -266,9 +272,12 @@ void GraphWidget::graphDraw()
 
     //inspector delete odd nodes
     QMap<Node*, bool>::iterator i;
+
     for (i = inspect.begin(); i != inspect.end(); ++i)
-        if(i.value()==false)
+        if(i.value()==false){
             delete i.key();
+
+        }
 
     //edge deleting
     QVector<Node*> odd;
@@ -819,4 +828,9 @@ void GraphWidget::processEulerianResults(QVector<Node *> eulerian_path)
     }
 
     setDirected(true);
+}
+
+void GraphWidget::setAlgosTime(int time)
+{
+    alg->setAlgosTime(time);
 }

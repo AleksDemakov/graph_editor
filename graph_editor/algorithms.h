@@ -25,6 +25,8 @@ public:
 
     QMap< Node *, int > getDijkstraDistance();
 
+    void setAlgosTime(int time);
+
 public slots:
     void start_dfs_alg();
     void start_bfs_alg();
@@ -56,6 +58,8 @@ private:
 
     GraphWidget * graph;
     Node * start_vertex;
+
+    void delay();
 
 
 

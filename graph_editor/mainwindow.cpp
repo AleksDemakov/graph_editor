@@ -4,6 +4,8 @@
 #include "mainwindow.h"
 #include "node.h"
 #include "edge.h"
+#include <QTableView>
+
 
 QWidget *loadUi(const QString url) // Return object QWidget
 {
@@ -20,6 +22,7 @@ QWidget *loadUi(const QString url) // Return object QWidget
 
 MainWindow::MainWindow()
 {
+
     //items:generate a widget with a .ui file
     QWidget *formWidget = loadUi("../graph_editor/tabwidget.ui");
     //"../graph_editor/tabwidget.ui"
@@ -30,7 +33,7 @@ MainWindow::MainWindow()
 
     gwidget = new GraphWidget(this);
     // !
-    gwidget->setFixedSize(500, 500);
+    //gwidget->setFixedSize(500, 500);
     //gwidget->setMinimumSize(500, 500);
 
 
@@ -48,12 +51,12 @@ MainWindow::MainWindow()
     QHBoxLayout *mainLayout = new QHBoxLayout;
         mainLayout->addWidget(formWidget);
         mainLayout->addWidget(gwidget);
-
+    mainLayout->setContentsMargins(10,0,35,0);
     mainContainer->setLayout(mainLayout);
 
     this->setCentralWidget(mainContainer);
     // !
-    this->setFixedSize(1000, 600);
+    //this->setFixedSize(1000, 600);
 
     QRadioButton *but  = findChild<QRadioButton*>("buttonDirected");
     gwidget->isDirected = but->isChecked();
@@ -85,6 +88,9 @@ MainWindow::MainWindow()
     connect(findChild<QPushButton *>("dijkstra_button"), SIGNAL(clicked()), this, SLOT( start_dijkstra() ) );
     connect(findChild<QPushButton *>("kruskal_button"), SIGNAL(clicked()), this, SLOT( start_kruskal() ) );
     connect(findChild<QPushButton *>("eulerian_button"), SIGNAL(clicked()), this, SLOT( start_eulerian() ) );
+
+
+    connect(findChild<QSlider *>("algos_time_slider"), SIGNAL(valueChanged(int)), this, SLOT( setAlgosTime(int) ) );
 
 
     emit gwidget->graphChanged();
@@ -421,6 +427,9 @@ void MainWindow::start_graph_data_changes_timer()
     graph_data_changes_timer->start();
 }
 
-
-
-
+void MainWindow::setAlgosTime(int time)
+{
+    QLabel * label = findChild<QLabel *>("cur_algos_time");
+    label->setText( QString::number(time) + " ms" );
+    gwidget->setAlgosTime(time);
+}

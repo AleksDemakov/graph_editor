@@ -38,6 +38,8 @@ public:
     int mex();
     QSet< Edge * > getAllEdges();
 
+    void setAlgosTime(int time);
+
     void start_dfs(QString name);
     void start_bfs(QString name);
     void start_dijkstra(QString name);
@@ -61,7 +63,6 @@ public slots:
     void setDirected(bool isdir);
     void setWeighted();
     void setWeighted(bool isdir);
-
 
 
 
