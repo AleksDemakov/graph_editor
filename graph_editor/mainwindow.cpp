@@ -45,13 +45,13 @@ MainWindow::MainWindow()
     createMenus();
 
     //containers
-    //formWidget->setMinimumSize(375, 492);
+
     formWidget->setMinimumSize(400, 520);
 
     QWidget *mainContainer = new QWidget;
     QHBoxLayout *mainLayout = new QHBoxLayout;
-        mainLayout->addWidget(formWidget);
-        mainLayout->addWidget(gwidget);
+    mainLayout->addWidget(formWidget);
+    mainLayout->addWidget(gwidget);
     mainLayout->setContentsMargins(10, 10, 35, 35);
     mainContainer->setLayout(mainLayout);
 
@@ -222,7 +222,7 @@ void MainWindow::about()
                "<li><b>Right Click</b> on node creates edge from it,"
                " Second right click makes two nodes connected</li>"
                "<li><b> Shift + Left Click</b> delete items</li></ul>"
-               "© А. В. Демаков, В. А. Муратов 2020 г."));
+               "© A. Demakov, V. Muratov 2020 y."));
 
 }
 void MainWindow::algorithmsDes(){

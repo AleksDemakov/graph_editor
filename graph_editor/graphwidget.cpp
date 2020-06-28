@@ -21,7 +21,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     //sc = new QGraphicsScene(this);
     sc = new QGraphicsScene(this);
     sc->setItemIndexMethod(QGraphicsScene::NoIndex);
-    //sc->setSceneRect(-200, -200, 400, 400);
     sc->setSceneRect(this->rect());
     setScene(sc);
     setCacheMode(CacheBackground);
@@ -307,12 +306,7 @@ void GraphWidget::radiusChange(int rad)
         i->set_radius(rad);
 }
 void GraphWidget::mousePressEvent(QMouseEvent *event)
-{
-
-    this->scene()->setSceneRect(this->rect());
-    for(Node *i:graph)i->update();
-    qDebug() << this->sceneRect();
-    //update();
+{ 
 
     //catch item clicked
     //qDebug()<<itemAt(event->pos())->type();
@@ -832,4 +826,11 @@ void GraphWidget::processEulerianResults(QVector<Node *> eulerian_path)
 void GraphWidget::setAlgosTime(int time)
 {
     alg->setAlgosTime(time);
+}
+
+void GraphWidget::resizeEvent(QResizeEvent *event)
+{
+    this->scene()->setSceneRect(this->rect());
+    this->item_is_changed();
+    QWidget::resizeEvent(event);
 }
