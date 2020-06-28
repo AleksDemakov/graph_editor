@@ -34,6 +34,7 @@ public:
     const QString & get_name();
     Edge *get_edge(Node *to);
     void set_name(QString new_name);
+    void set_radius(int);
 
 public slots:
     void set_color(QColor new_color);
@@ -46,6 +47,7 @@ private:
     GraphWidget *graph;
     QVector<Edge *> edges;
 
+    int radius;
     QPointF new_calculated_pos;
     QColor color;
     QString name = "";

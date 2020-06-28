@@ -32,6 +32,7 @@ public:
     bool isWeighted = false;
     QColor edgeColor;
     QColor nodeColor;
+    int radius;
     double edge_length = 110;
     int cnt_of_nodes = 0;
     QFont font;
@@ -61,8 +62,8 @@ public slots:
     void setDirected(bool isdir);
     void setWeighted();
     void setWeighted(bool isdir);
-
-
+    void radiusChange(int);
+    void setFontSize(int);
 
 
 
