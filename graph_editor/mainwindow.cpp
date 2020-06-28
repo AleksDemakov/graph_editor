@@ -30,7 +30,7 @@ MainWindow::MainWindow()
     //items
     //items:scene for drawing
     //GraphWidget *gwidget = new GraphWidget(this);
-
+    //QGraphicsScene *scene = new QGraphicsScene();
     gwidget = new GraphWidget(this);
     // !
     //gwidget->setFixedSize(500, 500);

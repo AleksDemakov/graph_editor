@@ -18,10 +18,11 @@ GraphWidget::GraphWidget(QWidget *parent)
     : QGraphicsView(parent)
 {
     setMinimumSize(500, 400);
+    //sc = new QGraphicsScene(this);
     sc = new QGraphicsScene(this);
     sc->setItemIndexMethod(QGraphicsScene::NoIndex);
-    sc->setSceneRect(-200, -200, 400, 400);
-    //sc->setSceneRect(this->rect());
+    //sc->setSceneRect(-200, -200, 400, 400);
+    sc->setSceneRect(this->rect());
     setScene(sc);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
@@ -306,7 +307,10 @@ void GraphWidget::radiusChange(int rad)
 }
 void GraphWidget::mousePressEvent(QMouseEvent *event)
 {
-    //qDebug() << algos_thread.isRunning();
+
+    this->scene()->setSceneRect(this->rect());
+    for(Node *i:graph)i->update();
+    qDebug() << this->sceneRect();
     //update();
 
     //catch item clicked
