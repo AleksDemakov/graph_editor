@@ -39,6 +39,7 @@ class MainWindow : public QMainWindow
         void start_dijkstra();
         void start_kruskal();
         void start_eulerian();
+        void setAlgosTime(int time);
 
     private slots:
         void start_graph_data_changes_timer();

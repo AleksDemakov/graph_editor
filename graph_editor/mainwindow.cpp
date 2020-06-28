@@ -33,7 +33,7 @@ MainWindow::MainWindow()
 
     gwidget = new GraphWidget(this);
     // !
-    gwidget->setFixedSize(500, 500);
+    //gwidget->setFixedSize(500, 500);
     //gwidget->setMinimumSize(500, 500);
 
 
@@ -56,7 +56,7 @@ MainWindow::MainWindow()
 
     this->setCentralWidget(mainContainer);
     // !
-    this->setFixedSize(1000, 600);
+    //this->setFixedSize(1000, 600);
 
     QRadioButton *but  = findChild<QRadioButton*>("buttonDirected");
     gwidget->isDirected = but->isChecked();
@@ -88,6 +88,9 @@ MainWindow::MainWindow()
     connect(findChild<QPushButton *>("dijkstra_button"), SIGNAL(clicked()), this, SLOT( start_dijkstra() ) );
     connect(findChild<QPushButton *>("kruskal_button"), SIGNAL(clicked()), this, SLOT( start_kruskal() ) );
     connect(findChild<QPushButton *>("eulerian_button"), SIGNAL(clicked()), this, SLOT( start_eulerian() ) );
+
+
+    connect(findChild<QSlider *>("algos_time_slider"), SIGNAL(valueChanged(int)), this, SLOT( setAlgosTime(int) ) );
 
 
     emit gwidget->graphChanged();
@@ -422,5 +425,12 @@ void MainWindow::start_graph_data_changes_timer()
     graph_data_changes_timer->setSingleShot(true);
 
     graph_data_changes_timer->start();
+}
+
+void MainWindow::setAlgosTime(int time)
+{
+    QLabel * label = findChild<QLabel *>("cur_algos_time");
+    label->setText( QString::number(time) + " ms" );
+    gwidget->setAlgosTime(time);
 }
 

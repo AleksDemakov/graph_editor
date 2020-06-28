@@ -20,13 +20,14 @@ GraphWidget::GraphWidget(QWidget *parent)
 
     sc = new QGraphicsScene(this);
     sc->setItemIndexMethod(QGraphicsScene::NoIndex);
-    sc->setSceneRect(-200, -200, 400, 400);
+    //sc->setSceneRect(-200, -200, 400, 400);
+    sc->setSceneRect( this->rect() );
     setScene(sc);
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
-    scale(qreal(0.8), qreal(0.8));
+    //scale(qreal(0.8), qreal(0.8));
     setMinimumSize(500, 400);
 
     drawing_edge = NULL;
@@ -827,4 +828,9 @@ void GraphWidget::processEulerianResults(QVector<Node *> eulerian_path)
     }
 
     setDirected(true);
+}
+
+void GraphWidget::setAlgosTime(int time)
+{
+    alg->setAlgosTime(time);
 }
