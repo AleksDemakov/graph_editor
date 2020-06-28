@@ -72,6 +72,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     void nodesColorChange();
     void edgesColorChange();
     bool isEulerian();

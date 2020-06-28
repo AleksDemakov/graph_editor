@@ -195,16 +195,19 @@ void Node::calculateForces() {
 
         //qDebug() << pos() << dx << " " << dy << node->pos();
 
-        if (d < 1) dx = dy = 3;
+        if (d < 5) {
+            dx *= 10;
+            dy *= 10;
+        }
 
 
         if (d < graph->edge_length) {
             xvel -= 6 / dx;
             yvel -= 6 / dy;
         }
-//        else if (d > 2.0 * edge_length){
+//        else if (d > 2.0 * graph->edge_length){
 //            xvel += 0.01;
-//            yvel -= 0.01;
+//            yvel += 0.01;
 //        }
 
 
@@ -212,8 +215,10 @@ void Node::calculateForces() {
 
    // qDebug() << xvel << " " << yvel;
 
-    xvel = xvel > 0 ? qMin(xvel, 1.0) : qMax(xvel, -1.0) ;
-    yvel = yvel > 0 ? qMin(yvel, 1.0) : qMax(yvel, -1.0) ;
+    xvel = xvel > 0 ? qMin(xvel, 0.2) : qMax(xvel, -0.2) ;
+    yvel = yvel > 0 ? qMin(yvel, 0.2) : qMax(yvel, -0.2) ;
+
+    qDebug() << xvel << " " << yvel;
 
 
 
@@ -225,8 +230,8 @@ void Node::calculateForces() {
     QRectF sceneRect = scene()->sceneRect();
     new_calculated_pos = pos() + QPointF(xvel, yvel);
 
-    new_calculated_pos.setX(qMin(qMax(new_calculated_pos.x(), sceneRect.left() / 0.8 ), sceneRect.right() / 0.8 ));
-    new_calculated_pos.setY(qMin(qMax(new_calculated_pos.y(), sceneRect.top() / 0.8 ), sceneRect.bottom() / 0.8 ));
+    new_calculated_pos.setX(qMin(qMax(new_calculated_pos.x(), sceneRect.left() - radius ), sceneRect.right() + radius ));
+    new_calculated_pos.setY(qMin(qMax(new_calculated_pos.y(), sceneRect.top() - radius ), sceneRect.bottom() + radius ));
 
     /*new_calculated_pos = pos() + QPointF(xvel, yvel);
     new_calculated_pos.setX( qMax( new_calculated_pos.x(), -300.0 ) );
