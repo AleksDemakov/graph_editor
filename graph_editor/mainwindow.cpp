@@ -112,7 +112,8 @@ void MainWindow::graphWrite()
 
     for(int i = 0; i < tgraph.size(); i++){
         for(Edge * j:tgraph[i]->get_edges()){
-            if(tgraph[i]->get_name() == j->get_destination_node()->get_name())
+            if(j->get_destination_node() == nullptr ||
+                    tgraph[i]->get_name() == j->get_destination_node()->get_name())
                 continue;
 
             str = str + tgraph[i]->get_name() + " ";

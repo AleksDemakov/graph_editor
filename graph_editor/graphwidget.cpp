@@ -334,7 +334,7 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
     if(QApplication::keyboardModifiers() != Qt::NoModifier)
         return;
     //if click on graph view, creates new node
-    if(!item_click  && event->button() == Qt::LeftButton)
+    if(!item_click  && event->button() == Qt::LeftButton && drawing_edge == NULL)
     {
 
         new Node(this, mapToScene( event->pos() ) );
